@@ -1,0 +1,60 @@
+<?php
+/**
+ * Template Name: Shuoshuo (说说)
+ *
+ * @package ArgonModern
+ */
+
+$options = \ArgonModern\Options::instance();
+$template = \ArgonModern\Template::instance();
+
+// Query for shuoshuo
+$paged = ( get_query_var( 'paged' ) ) ? get_query_var( 'paged' ) : 1;
+$args = [
+	'post_type'      => 'shuoshuo',
+	'post_status'    => 'publish',
+	'posts_per_page' => get_option( 'posts_per_page' ),
+	'paged'          => $paged
+];
+$shuoshuo_query = new WP_Query( $args );
+
+get_header(); ?>
+
+<div class="page-information-card-container">
+	<div class="page-information-card card bg-gradient-secondary shadow-lg border-0">
+		<div class="card-body">
+			<h3 class="text-black"><?php _e( '说说', 'argon' ); ?></h3>
+			<?php if ( get_the_archive_description() != '' ) : ?>
+				<p class="text-black mt-3">
+					<?php the_archive_description(); ?>
+				</p>
+			<?php endif; ?>
+			<p class="text-black mt-3 mb-0 opacity-8">
+				<i class="fa fa-quote-left mr-1"></i>
+				<?php echo wp_count_posts( 'shuoshuo' )->publish; ?> <?php _e( '条说说', 'argon' ); ?>
+			</p>
+		</div>
+	</div>
+</div>
+
+<?php get_sidebar(); ?>
+
+<div id="primary" class="content-area">
+	<main id="main" class="site-main" role="main">
+	<?php if ( $shuoshuo_query->have_posts() ) : ?>
+		<?php
+		while ( $shuoshuo_query->have_posts() ) :
+			$shuoshuo_query->the_post();
+			get_template_part( 'template-parts/content', 'shuoshuo' );
+		endwhile;
+		?>
+		<?php
+			echo $template::get_formatted_paginate_links_for_all_platforms( $shuoshuo_query );
+		?>
+		<?php
+		wp_reset_postdata();
+	else :
+		get_template_part( 'template-parts/content', 'none-tag' );
+	endif;
+	?>
+<?php get_footer(); ?>
