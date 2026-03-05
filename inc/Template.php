@@ -330,7 +330,18 @@ class Template {
 			if ( $now - $lastUpdated < 3600 ) {
 				return $options->get( "bing_banner_background_last_updated_url" );
 			} else {
-				$data = json_decode( @file_get_contents( 'https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1' ), true );
+				$response = wp_remote_get( 'https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1', [
+					'timeout' => 10,
+					'headers' => [ 'User-Agent' => 'ArgonThemeModern' ],
+				] );
+
+				if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) !== 200 ) {
+					return $options->get( "bing_banner_background_last_updated_url" );
+				}
+
+				$body = wp_remote_retrieve_body( $response );
+				$data = json_decode( $body, true );
+
 				if ( isset( $data['images'][0]['url'] ) ) {
 					$url = "//bing.com" . $data['images'][0]['url'];
 					update_option( "argon_bing_banner_background_last_updated_time", $now );

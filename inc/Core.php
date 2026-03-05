@@ -473,17 +473,13 @@ class Core {
 
 	private function post_analytics_info() {
 		$theme_version = defined( 'ARGON_MODERN_VERSION' ) ? ARGON_MODERN_VERSION : '2.0.0';
-		$url           = 'http://api.solstice23.top/argon_analytics/index.php?domain=' . urlencode( $_SERVER['HTTP_HOST'] ) . '&version=' . urlencode( $theme_version );
+		$url           = 'https://api.solstice23.top/argon_analytics/index.php?domain=' . urlencode( $_SERVER['HTTP_HOST'] ) . '&version=' . urlencode( $theme_version );
 
-		if ( function_exists( 'file_get_contents' ) ) {
-			$contexts = stream_context_create( [
-				'http' => [
-					'method' => "GET",
-					'header' => "User-Agent: ArgonThemeModern\r\n"
-				]
-			] );
-			@file_get_contents( $url, false, $contexts );
-		}
+		wp_remote_get( $url, [
+			'timeout' => 10,
+			'headers' => [ 'User-Agent' => 'ArgonThemeModern' ],
+		] );
+
 		update_option( 'argon_has_inited', 'true' );
 	}
 

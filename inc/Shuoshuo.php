@@ -53,6 +53,7 @@ class Shuoshuo {
 	}
 
 	public function ajax_upvote_shuoshuo() {
+		check_ajax_referer( 'argon_nonce', 'nonce' );
 		$id = isset( $_POST['shuoshuo_id'] ) ? intval( $_POST['shuoshuo_id'] ) : ( isset( $_POST['id'] ) ? intval( $_POST['id'] ) : 0 );
 		if ( ! $id ) {
 			wp_send_json_error( [ 'msg' => __( 'ID 错误', 'argon' ) ] );

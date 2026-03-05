@@ -145,6 +145,7 @@
 		var argonConfig = {
 			wp_path: "<?php echo $options->get('wp_path') == '' ? '/' : $options->get('wp_path'); ?>",
 			language: "<?php echo \ArgonModern\Template::get_locate(); ?>",
+			nonce: "<?php echo wp_create_nonce( 'argon_nonce' ); ?>",
 			dateFormat: "<?php echo $options->get('dateformat', 'YMD'); ?>",
 			<?php if ($options->get('enable_zoomify') == 'true'){ ?>
 				zoomify: {

@@ -911,6 +911,7 @@ $(document).on("click" , "#blog_setting_card_radius_to_default" , function(){
 				dataType : "json",
 				data: {
 					action: "pin_comment",
+					nonce: argonConfig.nonce,
 					id: commentID,
 					pinned: pinned ? "false" : "true"
 				},
@@ -1129,6 +1130,7 @@ $(document).on("click" , "#blog_setting_card_radius_to_default" , function(){
 			dataType : "json",
 			data: {
 				action: "ajax_post_comment",
+				nonce: argonConfig.nonce,
 				comment: commentContent,
 				author: commentName,
 				email: commentEmail,
@@ -1312,6 +1314,7 @@ $(document).on("click" , "#blog_setting_card_radius_to_default" , function(){
 			dataType : "json",
 			data: {
 				action: "user_edit_comment",
+				nonce: argonConfig.nonce,
 				comment: commentContent,
 				id: editID
 			},
@@ -1420,6 +1423,7 @@ $(document).on("click" , ".comment-upvote" , function(){
 		dataType : "json",
 		data : {
 			action: "upvote_comment",
+			nonce: argonConfig.nonce,
 			comment_id : ID,
 		},
 		success : function(result){
@@ -1529,6 +1533,7 @@ function showCommentEditHistory(id){
 		dataType : "json",
 		data: {
 			action: "get_comment_edit_history",
+			nonce: argonConfig.nonce,
 			id: id
 		},
 		success: function(result){
@@ -2146,6 +2151,7 @@ $(document).on("click" , ".shuoshuo-upvote" , function(){
 		dataType : "json",
 		data : {
 			action: "upvote_shuoshuo",
+			nonce: argonConfig.nonce,
 			shuoshuo_id : ID,
 		},
 		success : function(result){

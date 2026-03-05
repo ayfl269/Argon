@@ -1,6 +1,6 @@
 <?php
 /**
- * Template Name: Archives (归档时间轴)
+ * Template Name: 归档时间轴
  *
  * @package ArgonModern
  */

@@ -65,6 +65,7 @@ class Comments {
 				function toogleCommentPin(commentID, pinned) {
 					var data = {
 						action: 'pin_comment',
+						nonce: '<?php echo wp_create_nonce( 'argon_nonce' ); ?>',
 						id: commentID,
 						pinned: pinned ? 'true' : 'false'
 					};
@@ -85,6 +86,7 @@ class Comments {
 	 * AJAX: Get comment edit history
 	 */
 	public function get_comment_edit_history() {
+		check_ajax_referer( 'argon_nonce', 'nonce' );
 		$id = isset( $_POST['id'] ) ? intval( $_POST['id'] ) : 0;
 		if ( ! $id || ! function_exists( 'can_visit_comment_edit_history' ) || ! can_visit_comment_edit_history( $id ) ) {
 			wp_send_json( [
@@ -126,6 +128,7 @@ class Comments {
 	 * AJAX: Upvote comment
 	 */
 	public function upvote_comment() {
+		check_ajax_referer( 'argon_nonce', 'nonce' );
 		$options = Options::instance();
 		if ( $options->get( "argon_enable_comment_upvote", "false" ) != "true" ) {
 			return;
@@ -178,6 +181,7 @@ class Comments {
 	 * AJAX: Post comment
 	 */
 	public function ajax_post_comment() {
+		check_ajax_referer( 'argon_nonce', 'nonce' );
 		$parentID = isset( $_POST['comment_parent'] ) ? intval( $_POST['comment_parent'] ) : 0;
 		if ( function_exists( 'is_comment_private_mode' ) && is_comment_private_mode( $parentID ) ) {
 			if ( ! function_exists( 'user_can_view_comment' ) || ! user_can_view_comment( $parentID ) ) {
@@ -258,6 +262,7 @@ class Comments {
 	 * AJAX: Edit comment
 	 */
 	public function user_edit_comment() {
+		check_ajax_referer( 'argon_nonce', 'nonce' );
 		$options = Options::instance();
 		if ( $options->get( "argon_comment_allow_editing" ) == "false" ) {
 			wp_send_json( [
@@ -290,6 +295,8 @@ class Comments {
 		$content = $contentSource;
 		if ( get_comment_meta( $id, "use_markdown", true ) == "true" ) {
 			$content = self::comment_markdown_parse( $content );
+		} else {
+			$content = wp_kses_post( $content );
 		}
 
 		$res = wp_update_comment( [
@@ -331,6 +338,7 @@ class Comments {
 	 * AJAX: Pin comment
 	 */
 	public function pin_comment() {
+		check_ajax_referer( 'argon_nonce', 'nonce' );
 		$options = Options::instance();
 		if ( $options->get( "argon_enable_comment_pinning" ) == "false" ) {
 			wp_send_json( [
@@ -382,7 +390,17 @@ class Comments {
 
 	public static function get_comment_captcha_seed( $refresh = false ) {
 		if ( ! session_id() ) {
-			@session_start();
+			if ( ! headers_sent() ) {
+				session_set_cookie_params( [
+					'lifetime' => 0,
+					'path'     => '/',
+					'domain'   => $_SERVER['HTTP_HOST'],
+					'secure'   => is_ssl(),
+					'httponly' => true,
+					'samesite' => 'Strict',
+				] );
+				session_start();
+			}
 		}
 		if ( isset( $_SESSION['captchaSeed'] ) && ! $refresh ) {
 			$res = $_SESSION['captchaSeed'];
@@ -436,9 +454,8 @@ class Comments {
 	// --- Comment Processing ---
 
 	public static function comment_markdown_parse( $comment_content ) {
-		// Use the legacy _Parsedown if available, or port it later
 		if ( ! class_exists( '_Parsedown' ) ) {
-			$parsedown_path = get_template_directory() . '/parsedown.php';
+			$parsedown_path = ARGON_MODERN_PATH . '/parsedown.php';
 			if ( file_exists( $parsedown_path ) ) {
 				require_once $parsedown_path;
 			}
@@ -446,16 +463,24 @@ class Comments {
 
 		if ( class_exists( '_Parsedown' ) ) {
 			$parsedown = new \_Parsedown();
-			$res       = $parsedown->text( $comment_content );
+			$parsedown->setSafeMode( true );
+			$parsedown->setMarkupEscaped( true );
+			$res = $parsedown->text( $comment_content );
 		} else {
 			$res = $comment_content;
 		}
 
+		// Strictly filter HTML
+		$allowed_html = wp_kses_allowed_html( 'post' );
+		$res = wp_kses( $res, $allowed_html );
+
+		// Safely add target="_blank" and rel attributes
 		$res = preg_replace(
-			'/<a (.*?)>(.*?)<\/a>/',
-			'<a $1 target="_blank">$2</a>',
+			'/<a([^>]*?)>/i',
+			'<a$1 rel="noopener noreferrer nofollow" target="_blank">',
 			$res
 		);
+
 		return $res;
 	}
 

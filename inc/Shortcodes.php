@@ -471,18 +471,14 @@ class Shortcodes {
 		$forks       = "";
 
 		if ( $getdata == "backend" ) {
-			try {
-				$contexts = stream_context_create(
-					[
-						'http' => [
-							'method' => "GET",
-							'header' => "User-Agent: ArgonTheme\r\n"
-						]
-					]
-				);
-				$json     = @file_get_contents( "https://api.github.com/repos/" . $author . "/" . $project, false, $contexts );
+			$response = wp_remote_get( "https://api.github.com/repos/" . $author . "/" . $project, [
+				'timeout' => 10,
+				'headers' => [ 'User-Agent' => 'ArgonThemeModern' ],
+			] );
+
+			if ( ! is_wp_error( $response ) && wp_remote_retrieve_response_code( $response ) === 200 ) {
+				$json = json_decode( wp_remote_retrieve_body( $response ) );
 				if ( ! empty( $json ) ) {
-					$json        = json_decode( $json );
 					$description = esc_html( $json->description );
 					if ( ! empty( $json->homepage ) ) {
 						$description .= esc_html( " <a href='" . $json->homepage . "' target='_blank' no-pjax>" . $json->homepage . "</a>" );
@@ -492,7 +488,7 @@ class Shortcodes {
 				} else {
 					$getdata = "frontend";
 				}
-			} catch ( \Exception $e ) {
+			} else {
 				$getdata = "frontend";
 			}
 		}

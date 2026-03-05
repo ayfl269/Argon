@@ -1,6 +1,6 @@
 <?php
 /**
- * Template Name: Shuoshuo (说说)
+ * Template Name: 说说
  *
  * @package ArgonModern
  */
