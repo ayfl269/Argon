@@ -1864,16 +1864,9 @@ function classInit(){
 			$("html").trigger("resize");
 		}
 	}
-	if ($("#main").hasClass("article-list-search")){
-		if (!$("html").hasClass("no-banner")){
-			$("html").addClass("no-banner");
-			$("html").trigger("resize");
-		}
-	}else{
-		if ($("html").hasClass("no-banner") && !argonConfig.no_banner_by_default){
-			$("html").removeClass("no-banner");
-			$("html").trigger("resize");
-		}
+	if ($("html").hasClass("no-banner") && !argonConfig.no_banner_by_default){
+		$("html").removeClass("no-banner");
+		$("html").trigger("resize");
 	}
 }
 classInit();
