@@ -29,8 +29,6 @@ get_header(); ?>
 
 		endwhile;
 		?>
-	</main>
-</div>
 
 <style>
 #main article {
