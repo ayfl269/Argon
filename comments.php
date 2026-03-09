@@ -169,7 +169,7 @@ if ($enable_qq_avatar) {
 								<div class="input-group-prepend">
 									<span class="input-group-text"><i class="fa fa-envelope"></i></span>
 								</div>
-								<input id="post_comment_email" class="form-control" placeholder="<?php _e('邮箱', 'argon');?><?php if ($enable_qq_avatar){echo __(' / QQ 号', 'argon');} ?>" type="email" name="email" value="<?php if (is_user_logged_in()) {echo esc_attr( wp_get_current_user()->user_email );} else {echo esc_attr( $current_commenter['comment_author_email'] );} ?>">
+								<input id="post_comment_email" class="form-control" placeholder="<?php _e('邮箱', 'argon');?><?php if ($enable_qq_avatar){echo __(' / QQ 号', 'argon');} ?>" type="<?php echo $enable_qq_avatar ? 'text' : 'email'; ?>" name="email" value="<?php if (is_user_logged_in()) {echo esc_attr( wp_get_current_user()->user_email );} else {echo esc_attr( $current_commenter['comment_author_email'] );} ?>" inputmode="<?php echo $enable_qq_avatar ? 'text' : 'email'; ?>" autocapitalize="off" autocomplete="email">
 							</div>
 						</div>
 					</div>

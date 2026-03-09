@@ -12,7 +12,6 @@ class Core {
 		add_action( 'after_setup_theme', [ $this, 'init_analytics' ] );
 		add_action( 'widgets_init', [ $this, 'widgets_init' ] );
 		add_action( 'wp_ajax_update_post_meta_ajax', [ $this, 'ajax_update_post_meta_ajax' ] );
-		add_action( 'wp_ajax_nopriv_update_post_meta_ajax', [ $this, 'ajax_update_post_meta_ajax' ] );
 		add_filter( 'excerpt_length', [ $this, 'excerpt_length' ], 999 );
 		add_filter( 'excerpt_more', [ $this, 'excerpt_more' ] );
 
@@ -519,8 +518,25 @@ class Core {
 			wp_send_json_error( [ 'msg' => __( 'Nonce 验证失败', 'argon' ) ] );
 		}
 		$post_id    = intval( $_POST["post_id"] );
-		$meta_key   = $_POST["meta_key"];
-		$meta_value = $_POST["meta_value"];
+		$meta_key   = isset( $_POST["meta_key"] ) ? sanitize_key( wp_unslash( $_POST["meta_key"] ) ) : '';
+		$meta_value = isset( $_POST["meta_value"] ) ? wp_unslash( $_POST["meta_value"] ) : '';
+
+		$allowed_meta_keys = [
+			'argon_hide_readingtime',
+			'argon_meta_simple',
+			'argon_first_image_as_thumbnail',
+			'argon_show_post_outdated_info',
+			'argon_after_post',
+			'argon_custom_css',
+		];
+
+		if ( ! $post_id || ! in_array( $meta_key, $allowed_meta_keys, true ) ) {
+			wp_send_json_error( [ 'msg' => __( '非法请求参数', 'argon' ) ] );
+		}
+
+		if ( ! current_user_can( 'edit_post', $post_id ) ) {
+			wp_send_json_error( [ 'msg' => __( '您没有权限进行此操作', 'argon' ) ] );
+		}
 
 		if ( get_post_meta( $post_id, $meta_key, true ) == $meta_value ) {
 			wp_send_json_success();

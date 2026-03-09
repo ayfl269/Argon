@@ -3,7 +3,7 @@
 <div class="page-information-card-container">
 	<div class="page-information-card card bg-gradient-secondary shadow-lg border-0" <?php if (isset($_GET['post_type'])){echo 'style="animation: none;"';}?>>
 		<div class="card-body">
-			<h3 class="text-black mr-2 d-inline-block">	<?php echo get_search_query();?> </h3>
+			<h3 class="text-black mr-2 d-inline-block">	<?php echo esc_html( get_search_query() ); ?> </h3>
 			<p class="lead text-black mt-0 d-inline-block">
 				<?php _e('的搜索结果', 'argon');?>
 			</p>
@@ -24,8 +24,8 @@
 									$filter_name = $all_post_types[$filter_type] -> labels -> name;
 								?>
 									<div class="custom-control custom-checkbox search-filter-wrapper">
-										<input class="custom-control-input search-filter" name="<?php echo $filter_type; ?>" id="search_filter_<?php echo $filter_type; ?>" type="checkbox" <?php echo $checked ? 'checked="true"' : ''; ?>>
-										<label class="custom-control-label" for="search_filter_<?php echo $filter_type; ?>"><?php echo $filter_name; ?></label>
+										<input class="custom-control-input search-filter" name="<?php echo esc_attr( $filter_type ); ?>" id="search_filter_<?php echo esc_attr( $filter_type ); ?>" type="checkbox" <?php echo $checked ? 'checked="checked"' : ''; ?>>
+										<label class="custom-control-label" for="search_filter_<?php echo esc_attr( $filter_type ); ?>"><?php echo esc_html( $filter_name ); ?></label>
 									</div>
 								<?php
 								}

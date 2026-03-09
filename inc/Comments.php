@@ -106,6 +106,7 @@ class Comments {
 		date_default_timezone_set( get_option( 'timezone_string' ) );
 		foreach ( $editHistory as $edition ) {
 			$position -= 1;
+			$edition_content = isset( $edition->content ) ? nl2br( esc_html( $edition->content ) ) : '';
 			$res      .= "<div class='comment-edit-history-item'>
 						<div class='comment-edit-history-title'>
 							<div class='comment-edit-history-id'>
@@ -114,7 +115,7 @@ class Comments {
 							" . ( ( isset( $edition->isfirst ) && $edition->isfirst ) ? "<span class='badge badge-primary badge-admin'>" . __( "最初版本", 'argon' ) . "</span>" : "" ) . "
 						</div>
 						<div class='comment-edit-history-time'>" . date( 'Y-m-d H:i:s', $edition->time ) . "</div>
-						<div class='comment-edit-history-content'>" . str_replace( "\n", "</br>", $edition->content ) . "</div>
+						<div class='comment-edit-history-content'>" . $edition_content . "</div>
 					</div>";
 		}
 
@@ -195,7 +196,7 @@ class Comments {
 
 		$options = Options::instance();
 		if ( $options->get( 'argon_comment_enable_qq_avatar' ) == 'true' ) {
-			if ( function_exists( 'check_qqnumber' ) && check_qqnumber( $_POST['email'] ) ) {
+			if ( $this->is_valid_qq_number( isset( $_POST['email'] ) ? wp_unslash( $_POST['email'] ) : '' ) ) {
 				$_POST['qq']    = $_POST['email'];
 				$_POST['email'] .= "@qq.com";
 			} else {
@@ -558,7 +559,10 @@ class Comments {
 		// 保存 QQ 号
 		if ( $options->get( 'argon_comment_enable_qq_avatar' ) == 'true' ) {
 			if ( ! empty( $_POST['qq'] ) ) {
-				update_comment_meta( $id, "qq_number", $_POST['qq'] );
+				$qq_number = preg_replace( '/\D+/', '', wp_unslash( $_POST['qq'] ) );
+				if ( $qq_number !== '' ) {
+					update_comment_meta( $id, "qq_number", $qq_number );
+				}
 			}
 		}
 	}
@@ -659,13 +663,27 @@ class Comments {
 		if ( ! isset( $comment ) || ! isset( $comment->comment_ID ) ) {
 			return $avatar;
 		}
-		$qqnumber = get_comment_meta( $comment->comment_ID, 'qq_number', true );
+		$qqnumber = preg_replace( '/\D+/', '', (string) get_comment_meta( $comment->comment_ID, 'qq_number', true ) );
 		if ( ! empty( $qqnumber ) ) {
 			preg_match_all( '/width=\'(.*?)\'/', $avatar, $preg_res );
-			$size = isset( $preg_res[1][0] ) ? $preg_res[1][0] : 40;
-			return "<img src='https://q1.qlogo.cn/g?b=qq&s=640&nk=" . $qqnumber . "' class='avatar avatar-" . $size . " photo' width='" . $size . "' height='" . $size . "'>";
+			$size = isset( $preg_res[1][0] ) ? absint( $preg_res[1][0] ) : 40;
+			if ( $size <= 0 ) {
+				$size = 40;
+			}
+			$avatar_url = esc_url( 'https://q1.qlogo.cn/g?b=qq&s=640&nk=' . $qqnumber );
+			return "<img src='" . $avatar_url . "' class='avatar avatar-" . esc_attr( (string) $size ) . " photo' width='" . esc_attr( (string) $size ) . "' height='" . esc_attr( (string) $size ) . "'>";
 		}
 		return $avatar;
+	}
+
+	private function is_valid_qq_number( $value ) {
+		$value = trim( (string) $value );
+
+		if ( function_exists( 'check_qqnumber' ) ) {
+			return check_qqnumber( $value );
+		}
+
+		return preg_match( '/^[1-9][0-9]{4,10}$/', $value ) === 1;
 	}
 
 	// --- Internal Helpers ---
