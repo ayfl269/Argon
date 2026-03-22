@@ -308,7 +308,7 @@
 					<a class="navbar-brand font-weight-bold" href="<?php echo esc_url( home_url( '/' ) ); ?>" aria-label="<?php bloginfo('name'); ?>"><?php echo $toolbar_title; ?></a>
 				</div>
 				<div class="navbar-collapse collapse" id="navbar_global">
-					<div class="navbar-collapse-header">
+					<div class="navbar-collapse-header d-lg-none">
 						<div class="input-group input-group-alternative">
 							<div class="input-group-prepend">
 								<span class="input-group-text"><i class="fa fa-search"></i></span>
@@ -330,7 +330,7 @@
 						}
 					?>
 					<ul class="navbar-nav align-items-lg-center ml-lg-auto">
-						<li id="navbar_search_container" class="nav-item" data-toggle="modal">
+						<li id="navbar_search_container" class="nav-item d-none d-lg-block" data-toggle="modal">
 							<div id="navbar_search_input_container">
 								<div class="input-group input-group-alternative">
 									<div class="input-group-prepend">

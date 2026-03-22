@@ -56,18 +56,26 @@ class Shuoshuo {
 		check_ajax_referer( 'argon_nonce', 'nonce' );
 		$id = isset( $_POST['shuoshuo_id'] ) ? intval( $_POST['shuoshuo_id'] ) : ( isset( $_POST['id'] ) ? intval( $_POST['id'] ) : 0 );
 		if ( ! $id ) {
-			wp_send_json_error( [ 'msg' => __( 'ID 错误', 'argon' ) ] );
+			wp_send_json( [
+				'status' => 'error',
+				'msg'    => __( 'ID 错误', 'argon' )
+			] );
 		}
 
 		$upvoted_list = isset( $_COOKIE['argon_shuoshuo_upvoted'] ) ? $_COOKIE['argon_shuoshuo_upvoted'] : '';
 		if ( in_array( $id, explode( ',', $upvoted_list ) ) ) {
-			wp_send_json_error( [ 'msg' => __( '该说说已被赞过', 'argon' ), 'total_upvote' => self::get_upvotes( $id ) ] );
+			wp_send_json( [
+				'status'       => 'error',
+				'msg'          => __( '该说说已被赞过', 'argon' ),
+				'total_upvote' => self::get_upvotes( $id )
+			] );
 		}
 
 		self::set_upvotes( $id );
 		setcookie( 'argon_shuoshuo_upvoted', $upvoted_list . $id . ',', time() + 31536000, '/' );
 
-		wp_send_json_success( [
+		wp_send_json( [
+			'status'       => 'success',
 			'id'           => $id,
 			'msg'          => __( '点赞成功', 'argon' ),
 			'total_upvote' => self::get_upvotes( $id ),

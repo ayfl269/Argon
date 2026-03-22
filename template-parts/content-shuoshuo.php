@@ -33,11 +33,6 @@
 			<?php the_content(); ?>
 		</div>
 		<?php
-			global $withcomments;
-			$withcomments = true;
-			comments_template( '/template-parts/comments-shuoshuo-preview.php' );
-		?>
-		<?php
 			get_template_part( 'template-parts/shuoshuo', 'operations' );
 		?>
 	</article>

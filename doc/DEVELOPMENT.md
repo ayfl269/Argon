@@ -97,4 +97,3 @@ if (typeof $.fn.somePlugin !== "undefined") {
 
 ## 6. 开发调试
 - **DEBUG 模式**: 开发时建议在 `wp-config.php` 中开启 `WP_DEBUG`。
-- **MD 文档同步**: 每次完成核心修复后，请更新 `missing-features.md` 和 `legacy-features-audit.md` 以追踪进度。

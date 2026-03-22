@@ -28,6 +28,8 @@ class Shortcodes {
 		add_shortcode( 'hide_reading_time', [ $this, 'shortcode_hide_reading_time' ] );
 		add_shortcode( 'post_time', [ $this, 'shortcode_post_time' ] );
 		add_shortcode( 'post_modified_time', [ $this, 'shortcode_post_modified_time' ] );
+		add_shortcode( 'argon_showcase_user', [ $this, 'shortcode_argon_showcase_user' ] );
+		add_shortcode( 'argon_showcase_description', [ $this, 'shortcode_argon_showcase_description' ] );
 		add_shortcode( 'noshortcode', [ $this, 'shortcode_noshortcode' ] );
 		add_shortcode( 'ref', [ $this, 'shortcode_ref' ] );
 
@@ -553,6 +555,14 @@ class Shortcodes {
 	public function shortcode_post_modified_time( $attr, $content = "" ) {
 		$format = isset( $attr['format'] ) ? $attr['format'] : 'Y-n-d G:i:s';
 		return get_the_modified_time( $format );
+	}
+
+	public function shortcode_argon_showcase_user( $attr, $content = "" ) {
+		return "";
+	}
+
+	public function shortcode_argon_showcase_description( $attr, $content = "" ) {
+		return "";
 	}
 
 	public function shortcode_noshortcode( $attr, $content = "" ) {

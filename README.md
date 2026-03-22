@@ -94,7 +94,8 @@ argon-modern/
 
 # 开发文档
 
-详细的开发文档请参阅 [DEVELOPMENT.md](DEVELOPMENT.md)
+详细的开发文档请参阅 [DEVELOPMENT.md](doc/DEVELOPMENT.md)
+模板开发文档请参阅 [TEMPLATE-DEVELOPMENT.md](doc/TEMPLATE-DEVELOPMENT.md)
 
 ## 快速开始
 
@@ -142,6 +143,10 @@ function myNewFeatureInit() {
 | `[ref]` | 脚注引用 |
 | `[post_time]` | 文章发布时间 |
 | `[post_modified_time]` | 文章修改时间 |
+| `[argon_showcase_user user="your_username"]` | 用户信息 |
+| `[argon_showcase_description]` | 展示描述 |
+| `[argon_showcase_description]...[/argon_showcase_description]` | 展示描述（多行） |
+
 
 # 主题设置
 

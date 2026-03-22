@@ -2077,6 +2077,9 @@ $(document).on('hide.bs.modal', function (e) {
 	$(document).on("click" , "#navbar_global.show #navbar_search_btn_mobile" , function(){
 		$("#navbar_global .navbar-toggler").click();
 	});
+	$(document).on("click" , "#navbar_menu_mask" , function(){
+		$("#navbar_global").collapse('hide');
+	});
 }();
 
 /*折叠区块小工具*/
@@ -2156,6 +2159,7 @@ $(document).on("click" , ".shuoshuo-upvote" , function(){
 				$this.addClass("shuoshuo-upvoted-animation");
 				iziToast.show({
 					title: result.msg,
+					message: "",
 					class: 'shadow-sm',
 					position: 'topRight',
 					backgroundColor: '#2dce89',
@@ -2170,6 +2174,7 @@ $(document).on("click" , ".shuoshuo-upvote" , function(){
 				$(".shuoshuo-upvote-num" , $this).html(result.total_upvote);
 				iziToast.show({
 					title: result.msg,
+					message: "",
 					class: 'shadow-sm',
 					position: 'topRight',
 					backgroundColor: '#f5365c',
@@ -2186,6 +2191,7 @@ $(document).on("click" , ".shuoshuo-upvote" , function(){
 			$this.removeClass("shuoshuo-upvoting");
 			iziToast.show({
 				title: __("点赞失败"),
+				message: "",
 				class: 'shadow-sm',
 				position: 'topRight',
 				backgroundColor: '#f5365c',
