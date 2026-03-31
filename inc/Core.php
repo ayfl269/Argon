@@ -79,6 +79,54 @@ class Core {
 
 		// Mail unsubscribe rewrite rule
 		add_action( 'init', [ $this, 'add_mail_unsubscribe_rule' ] );
+
+		// Image Optimization
+		$this->init_image_optimization();
+	}
+
+	public function init_image_optimization() {
+		$options = Options::instance();
+
+		// Disable big image threshold
+		if ( $options->get( 'argon_disable_big_image_threshold' ) == 'true' ) {
+			add_filter( 'big_image_size_threshold', '__return_false' );
+		}
+
+		// Disable intermediate image sizes
+		if ( $options->get( 'argon_disable_intermediate_image_sizes' ) == 'true' ) {
+			add_filter( 'intermediate_image_sizes_advanced', function( $sizes ) {
+				return [];
+			} );
+			add_filter( 'fallback_intermediate_image_sizes', function( $sizes ) {
+				return [];
+			} );
+		}
+
+		// Disable image srcset
+		if ( $options->get( 'argon_disable_image_srcset' ) == 'true' ) {
+			add_filter( 'max_srcset_image_width', '__return_false' );
+			add_filter( 'wp_calculate_image_srcset', '__return_false' );
+		}
+
+		// Disable image scaling (pixel ratio)
+		if ( $options->get( 'argon_disable_image_scaling' ) == 'true' ) {
+			add_filter( 'wp_get_attachment_image_attributes', function( $attr ) {
+				if ( isset( $attr['srcset'] ) ) {
+					unset( $attr['srcset'] );
+				}
+				if ( isset( $attr['sizes'] ) ) {
+					unset( $attr['sizes'] );
+				}
+				return $attr;
+			}, 10 );
+		}
+
+		// Disable image editor attributes (width/height)
+		if ( $options->get( 'argon_disable_image_editor_attributes' ) == 'true' ) {
+			add_filter( 'image_send_to_editor', function( $html ) {
+				return preg_replace( '/(width|height)="\d*"\s/', "", $html );
+			}, 10 );
+		}
 	}
 
 	public function add_mail_unsubscribe_rule() {
@@ -310,6 +358,10 @@ class Core {
 			return;
 		}
 
+		$this->inject_theme_color_css();
+	}
+
+	public function inject_theme_color_css() {
 		$options    = Options::instance();
 		$themecolor = $options->get( "theme_color", "#5e72e4" );
 		$RGB        = Utils::hexstr2rgb( $themecolor );
@@ -369,6 +421,7 @@ class Core {
 
 	public function login_page_style() {
 		wp_enqueue_style( "argon_login_css", ARGON_MODERN_URL . "/login.css", null, ARGON_MODERN_VERSION );
+		$this->inject_theme_color_css();
 	}
 
 	public function add_cache_control_headers() {

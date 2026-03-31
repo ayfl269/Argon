@@ -610,6 +610,62 @@ function themeoptions_page(){
 							<p class="description"><?php _e('开启后，页面的 URL 将会以 .html 结尾。', 'argon');?></p>
 						</td>
 					</tr>
+					<tr><th class="subtitle"><h2><?php _e('图像优化', 'argon');?></h2></th></tr>
+					<tr>
+						<th><label><?php _e('关闭图像高度限制', 'argon');?></label></th>
+						<td>
+							<select name="argon_disable_big_image_threshold">
+								<?php $argon_disable_big_image_threshold = get_option('argon_disable_big_image_threshold', 'false'); ?>
+								<option value="false" <?php if ($argon_disable_big_image_threshold=='false'){echo 'selected';} ?>><?php _e('关闭', 'argon');?></option>
+								<option value="true" <?php if ($argon_disable_big_image_threshold=='true'){echo 'selected';} ?>><?php _e('开启', 'argon');?></option>
+							</select>
+							<p class="description"><?php _e('开启后将禁用 WordPress 对大尺寸图像的高度限制和自动缩放。', 'argon');?></p>
+						</td>
+					</tr>
+					<tr>
+						<th><label><?php _e('禁止生成多种图像尺寸', 'argon');?></label></th>
+						<td>
+							<select name="argon_disable_intermediate_image_sizes">
+								<?php $argon_disable_intermediate_image_sizes = get_option('argon_disable_intermediate_image_sizes', 'false'); ?>
+								<option value="false" <?php if ($argon_disable_intermediate_image_sizes=='false'){echo 'selected';} ?>><?php _e('关闭', 'argon');?></option>
+								<option value="true" <?php if ($argon_disable_intermediate_image_sizes=='true'){echo 'selected';} ?>><?php _e('开启', 'argon');?></option>
+							</select>
+							<p class="description"><?php _e('开启后将禁止 WordPress 生成多种缩略图尺寸，节省服务器空间。', 'argon');?></p>
+						</td>
+					</tr>
+					<tr>
+						<th><label><?php _e('禁止图片设置多种尺寸', 'argon');?></label></th>
+						<td>
+							<select name="argon_disable_image_srcset">
+								<?php $argon_disable_image_srcset = get_option('argon_disable_image_srcset', 'false'); ?>
+								<option value="false" <?php if ($argon_disable_image_srcset=='false'){echo 'selected';} ?>><?php _e('关闭', 'argon');?></option>
+								<option value="true" <?php if ($argon_disable_image_srcset=='true'){echo 'selected';} ?>><?php _e('开启', 'argon');?></option>
+							</select>
+							<p class="description"><?php _e('开启后将禁用响应式图片（srcset 属性），防止图片设置多种尺寸。', 'argon');?></p>
+						</td>
+					</tr>
+					<tr>
+						<th><label><?php _e('禁止图片像素比缩放功能', 'argon');?></label></th>
+						<td>
+							<select name="argon_disable_image_scaling">
+								<?php $argon_disable_image_scaling = get_option('argon_disable_image_scaling', 'false'); ?>
+								<option value="false" <?php if ($argon_disable_image_scaling=='false'){echo 'selected';} ?>><?php _e('关闭', 'argon');?></option>
+								<option value="true" <?php if ($argon_disable_image_scaling=='true'){echo 'selected';} ?>><?php _e('开启', 'argon');?></option>
+							</select>
+							<p class="description"><?php _e('开启后将禁用图片像素比缩放功能。', 'argon');?></p>
+						</td>
+					</tr>
+					<tr>
+						<th><label><?php _e('禁止插入图片添加属性功能', 'argon');?></label></th>
+						<td>
+							<select name="argon_disable_image_editor_attributes">
+								<?php $argon_disable_image_editor_attributes = get_option('argon_disable_image_editor_attributes', 'false'); ?>
+								<option value="false" <?php if ($argon_disable_image_editor_attributes=='false'){echo 'selected';} ?>><?php _e('关闭', 'argon');?></option>
+								<option value="true" <?php if ($argon_disable_image_editor_attributes=='true'){echo 'selected';} ?>><?php _e('开启', 'argon');?></option>
+							</select>
+							<p class="description"><?php _e('开启后在编辑器插入图片时将不再自动添加 width 和 height 属性。', 'argon');?></p>
+						</td>
+					</tr>
 					<tr><th class="subtitle"><h2><?php _e('文章', 'argon');?></h2></th></tr>
 					<tr><th class="subtitle"><h3><?php _e('文章 Meta 信息', 'argon');?></h3></th></tr>
 					<tr>
@@ -2169,6 +2225,11 @@ function argon_update_themeoptions(){
 		argon_update_option_allow_tags('argon_seo_description');
 		argon_update_option('argon_seo_keywords');
 		argon_update_option('argon_page_add_html');
+		argon_update_option('argon_disable_big_image_threshold');
+		argon_update_option('argon_disable_intermediate_image_sizes');
+		argon_update_option('argon_disable_image_srcset');
+		argon_update_option('argon_disable_image_scaling');
+		argon_update_option('argon_disable_image_editor_attributes');
 		argon_update_option('argon_enable_mobile_scale');
 		argon_update_option('argon_page_background_url');
 		argon_update_option('argon_page_background_dark_url');

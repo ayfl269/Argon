@@ -45,6 +45,11 @@ class Options {
 			'argon_mathjax_cdn_url' => '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js',
 			'argon_mathjax_v2_cdn_url' => '//cdn.jsdelivr.net/npm/mathjax@2.7.5/MathJax.js?config=TeX-AMS_HTML',
 			'argon_katex_cdn_url' => '//cdn.jsdelivr.net/npm/katex@0.11.1/dist/',
+			'argon_disable_big_image_threshold' => 'false',
+			'argon_disable_intermediate_image_sizes' => 'false',
+			'argon_disable_image_srcset' => 'false',
+			'argon_disable_image_scaling' => 'false',
+			'argon_disable_image_editor_attributes' => 'false',
 		];
 		add_action( 'admin_init', [ $this, 'register_settings' ] );
 		// add_action( 'admin_menu', [ $this, 'add_admin_menu' ] );
