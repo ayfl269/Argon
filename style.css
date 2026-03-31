@@ -4811,11 +4811,13 @@ html.darkmode a:hover {
 	color: var(--themecolor);
 }
 
-html.darkmode ::-webkit-scrollbar {
+html.darkmode ::-webkit-scrollbar,
+html.darkmode::-webkit-scrollbar {
 	background-color: rgba(255, 255, 255, 0);
 }
-html.darkmode ::-webkit-scrollbar-thumb {
-	background-color: rgba(255, 255, 255, 0.25);
+html.darkmode ::-webkit-scrollbar-thumb,
+html.darkmode::-webkit-scrollbar-thumb {
+	background-color: rgba(94, 114, 228, 0.5);
 }
 
 html.darkmode .leftbar-menu-item > a {
