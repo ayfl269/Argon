@@ -568,12 +568,12 @@ class Comments {
 	}
 
 	public function comment_mail_notify( $comment ) {
-		if ( is_numeric( $comment ) ) {
-			$comment = get_comment( $comment );
-		}
 		$options = Options::instance();
 		if ( $options->get( "argon_comment_allow_mailnotice" ) != "true" ) {
 			return;
+		}
+		if ( is_numeric( $comment ) ) {
+			$comment = get_comment( $comment );
 		}
 		if ( $comment == null ) {
 			return;
