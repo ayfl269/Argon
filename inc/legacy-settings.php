@@ -2165,7 +2165,7 @@ function argon_update_option($name){
 }
 function argon_update_option_allow_tags($name){
 	if (isset($_POST[$name])) {
-		update_option($name, stripslashes($_POST[$name]));
+		update_option($name, wp_kses_post(wp_unslash($_POST[$name])));
 	}
 }
 function argon_update_option_checkbox($name){
@@ -2185,6 +2185,9 @@ function argon_update_themeoptions(){
 		}
 		$nonce = $_POST['argon_update_themeoptions_nonce'];
 		if (!wp_verify_nonce($nonce, 'argon_update_themeoptions')){
+			return;
+		}
+		if (!current_user_can('manage_options')){
 			return;
 		}
 		//配置项

@@ -72,7 +72,7 @@ class Shuoshuo {
 		}
 
 		self::set_upvotes( $id );
-		setcookie( 'argon_shuoshuo_upvoted', $upvoted_list . $id . ',', time() + 31536000, '/' );
+		setcookie( 'argon_shuoshuo_upvoted', $upvoted_list . $id . ',', time() + 31536000, '/', '', is_ssl(), true );
 
 		wp_send_json( [
 			'status'       => 'success',
@@ -97,6 +97,7 @@ class Shuoshuo {
 				'not_found_in_trash' => __( '没有已遗弃的说说', 'argon' ),
 				'menu_name'          => __( '说说', 'argon' )
 			],
+			'show_in_rest' => true,
 			'public'              => true,
 			'publicly_queryable'  => true,
 			'show_ui'             => true,

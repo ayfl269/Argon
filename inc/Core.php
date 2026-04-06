@@ -45,6 +45,7 @@ class Core {
 		// Login page style
 		if ( $options->get( 'enable_login_css' ) == 'true' ) {
 			add_action( 'login_head', [ $this, 'login_page_style' ] );
+			add_action( 'login_footer', [ $this, 'login_page_canvas' ] );
 		}
 
 		// Performance: Cache headers
@@ -358,10 +359,6 @@ class Core {
 			return;
 		}
 
-		$this->inject_theme_color_css();
-	}
-
-	public function inject_theme_color_css() {
 		$options    = Options::instance();
 		$themecolor = $options->get( "theme_color", "#5e72e4" );
 		$RGB        = Utils::hexstr2rgb( $themecolor );
@@ -421,7 +418,11 @@ class Core {
 
 	public function login_page_style() {
 		wp_enqueue_style( "argon_login_css", ARGON_MODERN_URL . "/login.css", null, ARGON_MODERN_VERSION );
-		$this->inject_theme_color_css();
+		wp_enqueue_script( "argon_login_js", ARGON_MODERN_URL . "/login.js", [ 'jquery' ], ARGON_MODERN_VERSION, true );
+	}
+
+	public function login_page_canvas() {
+		echo '<canvas id="star-trails-canvas"></canvas>';
 	}
 
 	public function add_cache_control_headers() {

@@ -162,7 +162,7 @@ class Shortcodes {
 		}
 		$out .= "<span class='alert-inner--text'>";
 		if ( isset( $attr['title'] ) ) {
-			$out .= "<strong>" . $attr['title'] . "</strong> ";
+			$out .= "<strong>" . esc_html( $attr['title'] ) . "</strong> ";
 		}
 		$out .= $content . "</span></div>";
 		return $out;
@@ -202,9 +202,9 @@ class Shortcodes {
 		if ( isset( $attr['title'] ) ) {
 			$out .= "<div class='admonition-title'>";
 			if ( isset( $attr['icon'] ) ) {
-				$out .= "<i class='fa fa-" . $attr['icon'] . "'></i> ";
+				$out .= "<i class='fa fa-" . esc_attr( $attr['icon'] ) . "'></i> ";
 			}
-			$out .= $attr['title'] . "</div>";
+			$out .= esc_html( $attr['title'] ) . "</div>";
 		}
 		if ( $content != '' ) {
 			$out .= "<div class='admonition-body'>" . $content . "</div>";
@@ -258,9 +258,9 @@ class Shortcodes {
 
 		$out .= "<div class='collapse-block-title'>";
 		if ( isset( $attr['icon'] ) ) {
-			$out .= "<i class='fa fa-" . $attr['icon'] . "'></i> ";
+			$out .= "<i class='fa fa-" . esc_attr( $attr['icon'] ) . "'></i> ";
 		}
-		$out .= "<span class='collapse-block-title-inner'>" . $title . "</span><i class='collapse-icon fa fa-angle-down'></i></div>";
+		$out .= "<span class='collapse-block-title-inner'>" . esc_html( $title ) . "</span><i class='collapse-icon fa fa-angle-down'></i></div>";
 
 		$out .= "<div class='collapse-block-body'";
 		if ( $collapsed != 'false' ) {
@@ -379,24 +379,24 @@ class Shortcodes {
 					<div class='card shadow-sm'>
 						<div class='d-flex'>
 							<div class='friend-link-avatar'>
-								<a target='_blank' href='" . $now[1] . "'>";
+								<a target='_blank' href='" . esc_url( $now[1] ) . "'>";
 				if ( ! empty( $now[4] ) && ! ctype_space( $now[4] ) ) {
-					$out .= "<img src='" . $now[4] . "' class='icon bg-gradient-secondary rounded-circle text-white' style='pointer-events: none;'>
+					$out .= "<img src='" . esc_url( $now[4] ) . "' class='icon bg-gradient-secondary rounded-circle text-white' style='pointer-events: none;'>
 							</img>";
 				} else {
-					$out .= "<div class='icon icon-shape bg-gradient-primary rounded-circle text-white'>" . mb_substr( $now[2], 0, 1 ) . "
+					$out .= "<div class='icon icon-shape bg-gradient-primary rounded-circle text-white'>" . esc_html( mb_substr( $now[2], 0, 1 ) ) . "
 							</div>";
 				}
 
 				$out .= "		</a>
 							</div>
 							<div class='pl-3'>
-								<div class='friend-link-title title text-primary'><a target='_blank' href='" . $now[1] . "'>" . $now[2] . "</a>
+								<div class='friend-link-title title text-primary'><a target='_blank' href='" . esc_url( $now[1] ) . "'>" . esc_html( $now[2] ) . "</a>
 							</div>";
 				if ( ! empty( $now[3] ) && ! ctype_space( $now[3] ) ) {
-					$out .= "<p class='friend-link-description'>" . $now[3] . "</p>";
+					$out .= "<p class='friend-link-description'>" . wp_kses_post( $now[3] ) . "</p>";
 				}
-				$out .= "		<a target='_blank' href='" . $now[1] . "' class='text-primary opacity-8'>前往</a>
+				$out .= "		<a target='_blank' href='" . esc_url( $now[1] ) . "' class='text-primary opacity-8'>前往</a>
 							</div>
 						</div>
 					</div>
@@ -420,10 +420,10 @@ class Shortcodes {
 			$now    = explode( "|", $value );
 			$now[0] = str_replace( "/", "</br>", $now[0] );
 			$out    .= "<div class='argon-timeline-node'>
-						<div class='argon-timeline-time'>" . $now[0] . "</div>
+						<div class='argon-timeline-time'>" . wp_kses_post( $now[0] ) . "</div>
 						<div class='argon-timeline-card card bg-gradient-secondary shadow-sm'>";
 			if ( ! empty( $now[1] ) ) {
-				$out .= "	<div class='argon-timeline-title'>" . $now[1] . "</div>";
+				$out .= "	<div class='argon-timeline-title'>" . wp_kses_post( $now[1] ) . "</div>";
 			}
 			$out .= "		<div class='argon-timeline-content'>";
 			foreach ( $now as $i => $val ) {
@@ -473,7 +473,7 @@ class Shortcodes {
 		$forks       = "";
 
 		if ( $getdata == "backend" ) {
-			$response = wp_remote_get( "https://api.github.com/repos/" . $author . "/" . $project, [
+			$response = wp_remote_get( "https://api.github.com/repos/" . urlencode( $author ) . "/" . urlencode( $project ), [
 				'timeout' => 10,
 				'headers' => [ 'User-Agent' => 'ArgonThemeModern' ],
 			] );
@@ -503,8 +503,8 @@ class Shortcodes {
 		$out .= "</span></a></div>";
 		$out .= "<div class='github-info-card-body'>
 				<div class='github-info-card-name-a'>
-					<a href='https://github.com/" . $author . "/" . $project . "' target='_blank' no-pjax>
-						<span class='github-info-card-name'>" . $author . "/" . $project . "</span>
+					<a href='https://github.com/" . esc_attr( $author ) . "/" . esc_attr( $project ) . "' target='_blank' no-pjax>
+						<span class='github-info-card-name'>" . esc_html( $author ) . "/" . esc_html( $project ) . "</span>
 					</a>
 					</div>
 				<div class='github-info-card-description'></div>
@@ -529,16 +529,16 @@ class Shortcodes {
 		$autoplay = isset( $attr['autoplay'] ) ? $attr['autoplay'] : 'false';
 		$out      = "<video";
 		if ( $width != '' ) {
-			$out .= " width='" . $width . "'";
+			$out .= " width='" . esc_attr( $width ) . "'";
 		}
 		if ( $height != '' ) {
-			$out .= " height='" . $height . "'";
+			$out .= " height='" . esc_attr( $height ) . "'";
 		}
 		if ( $autoplay == 'true' ) {
 			$out .= " autoplay";
 		}
 		$out .= " controls>";
-		$out .= "<source src='" . $url . "'>";
+		$out .= "<source src='" . esc_url( $url ) . "'>";
 		$out .= "</video>";
 		return $out;
 	}

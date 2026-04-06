@@ -155,7 +155,7 @@ class Comments {
 		}
 
 		self::set_comment_upvotes( $ID );
-		setcookie( 'argon_comment_upvoted', $upvotedList . $ID . ",", time() + 3153600000, '/' );
+		setcookie( 'argon_comment_upvoted', $upvotedList . $ID . ",", time() + 31536000, '/', '', is_ssl(), true );
 
 		wp_send_json( [
 			'ID'           => $ID,
@@ -189,7 +189,7 @@ class Comments {
 				wp_send_json( [
 					'status'  => 'failed',
 					'msg'     => __( '不能回复其他人的悄悄话评论', 'argon' ),
-					'isAdmin' => current_user_can( 'level_7' )
+					'isAdmin' => current_user_can( 'manage_options' )
 				] );
 			}
 		}
@@ -213,7 +213,7 @@ class Comments {
 			wp_send_json( [
 				'status'  => 'failed',
 				'msg'     => $msg,
-				'isAdmin' => current_user_can( 'level_7' )
+				'isAdmin' => current_user_can( 'manage_options' )
 			] );
 		}
 
@@ -239,7 +239,7 @@ class Comments {
 
 		$newCaptchaSeed = self::get_comment_captcha_seed( true );
 		$newCaptcha     = self::get_comment_captcha( $newCaptchaSeed );
-		if ( current_user_can( 'level_7' ) ) {
+		if ( current_user_can( 'manage_options' ) ) {
 			$newCaptchaAnswer = self::get_comment_captcha_answer( $newCaptchaSeed );
 		} else {
 			$newCaptchaAnswer = "";
@@ -254,7 +254,7 @@ class Comments {
 			'newCaptchaSeed'   => $newCaptchaSeed,
 			'newCaptcha'       => $newCaptcha,
 			'newCaptchaAnswer' => $newCaptchaAnswer,
-			'isAdmin'          => current_user_can( 'level_7' ),
+			'isAdmin'          => current_user_can( 'manage_options' ),
 			'isLogin'          => is_user_logged_in()
 		] );
 	}
@@ -318,7 +318,7 @@ class Comments {
 				'time'    => time(),
 				'isfirst' => false
 			] );
-			update_comment_meta( $id, "comment_edit_history", addslashes( json_encode( $editHistory, JSON_UNESCAPED_UNICODE ) ) );
+			update_comment_meta( $id, "comment_edit_history", wp_slash( wp_json_encode( $editHistory, JSON_UNESCAPED_UNICODE ) ) );
 
 			wp_send_json( [
 				'status'                 => 'success',
@@ -438,7 +438,7 @@ class Comments {
 			return $comment;
 		}
 		$answer = isset( $_POST['comment_captcha'] ) ? $_POST['comment_captcha'] : '';
-		if ( current_user_can( 'level_7' ) ) {
+		if ( current_user_can( 'manage_options' ) ) {
 			return $comment;
 		}
 		$captcha = new CaptchaHelper( self::get_comment_captcha_seed() );
@@ -446,7 +446,7 @@ class Comments {
 			wp_send_json( [
 				'status'  => 'failed',
 				'msg'     => __( '验证码错误', 'argon' ),
-				'isAdmin' => current_user_can( 'level_7' )
+				'isAdmin' => current_user_can( 'manage_options' )
 			] );
 		}
 		return $comment;
@@ -516,7 +516,7 @@ class Comments {
 			'time'    => time(),
 			'isfirst' => true
 		] ];
-		update_comment_meta( $id, "comment_edit_history", addslashes( json_encode( $editHistory, JSON_UNESCAPED_UNICODE ) ) );
+		update_comment_meta( $id, "comment_edit_history", wp_slash( wp_json_encode( $editHistory, JSON_UNESCAPED_UNICODE ) ) );
 
 		// 是否启用 Markdown
 		if ( isset( $_POST['use_markdown'] ) && $_POST['use_markdown'] == 'true' && $options->get( "argon_comment_allow_markdown" ) != "false" ) {
@@ -568,6 +568,13 @@ class Comments {
 	}
 
 	public function comment_mail_notify( $comment ) {
+		// 速率限制，防止垃圾邮件滥发请求
+		$rate_limit_key = 'argon_mail_notice_limit_' . md5( $_SERVER['REMOTE_ADDR'] );
+		if ( get_transient( $rate_limit_key ) ) {
+			return;
+		}
+		set_transient( $rate_limit_key, 1, 10 ); // 10 秒限制
+		
 		$options = Options::instance();
 		if ( $options->get( "argon_comment_allow_mailnotice" ) != "true" ) {
 			return;
