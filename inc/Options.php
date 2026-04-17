@@ -27,6 +27,7 @@ class Options {
 			'seo_description' => '',
 			'seo_keywords' => '',
 			'show_customize_theme_color_picker' => 'true',
+			'show_admin_bar' => 'true',
 			'enable_mobile_scale' => 'false',
 			'page_background_url' => '',
 			'page_background_dark_url' => '',

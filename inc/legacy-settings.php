@@ -99,6 +99,12 @@ function themeoptions_page(){
 										<input type="checkbox" name="argon_show_customize_theme_color_picker" value="true" <?php if ($argon_show_customize_theme_color_picker!='false'){echo 'checked';}?>/> <?php _e('允许用户自定义主题色（位于博客浮动操作栏设置菜单中）', 'argon');?>
 									</label>
 								</div>
+								<?php $argon_show_admin_bar = get_option('argon_show_admin_bar');?>
+								<div style="margin-top: 15px;">
+									<label>
+										<input type="checkbox" name="argon_show_admin_bar" value="true" <?php if ($argon_show_admin_bar!='false'){echo 'checked';}?>/> <?php _e('显示前台管理 (wpadminbar)', 'argon');?>
+									</label>
+								</div>
 							</p>
 						</td>
 					</tr>
@@ -2225,6 +2231,7 @@ function argon_update_themeoptions(){
 		argon_update_option('argon_show_headindex_number');
 		argon_update_option('argon_theme_color');
 		argon_update_option_checkbox('argon_show_customize_theme_color_picker');
+		argon_update_option_checkbox('argon_show_admin_bar');
 		argon_update_option_allow_tags('argon_seo_description');
 		argon_update_option('argon_seo_keywords');
 		argon_update_option('argon_page_add_html');
