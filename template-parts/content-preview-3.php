@@ -12,16 +12,17 @@ $template = \ArgonModern\Template::instance();
 		<?php
 			if ($template::has_post_thumbnail()){
 				echo "<header class='post-header post-header-with-thumbnail'>";
-				$thumbnail_url = $template::get_post_thumbnail();
+				$thumbnail_id = get_post_thumbnail_id(get_the_ID());
+				$thumbnail_data = wp_get_attachment_image_src($thumbnail_id, "full");
+				$thumbnail_url = $thumbnail_data ? $thumbnail_data[0] : $template::get_post_thumbnail();
+				$width = $thumbnail_data ? $thumbnail_data[1] : '';
+				$height = $thumbnail_data ? $thumbnail_data[2] : '';
+				$attr = ($width && $height) ? " width='{$width}' height='{$height}' style='aspect-ratio: {$width} / {$height}; width: 100%; height: auto;'" : "";
+
 				if ($options->get('enable_lazyload') != 'false'){
-					$placeholder = $template::get_thumbnail_placeholder(get_the_ID());
-					echo "<div class='post-thumbnail-wrapper' style='aspect-ratio: 16/9; overflow: hidden; border-radius: 0.25rem 0.25rem 0 0;'>";
-					echo "<img class='post-thumbnail lazyload' src='" . $placeholder . "' data-original='" . $thumbnail_url . "' alt='thumbnail' style='width: 100%; height: 100%; object-fit: cover; opacity: 0;'></img>";
-					echo "</div>";
+					echo "<img class='post-thumbnail' src='" . $thumbnail_url . "' loading='lazy' alt='thumbnail'{$attr}></img>";
 				}else{
-					echo "<div class='post-thumbnail-wrapper' style='aspect-ratio: 16/9; overflow: hidden; border-radius: 0.25rem 0.25rem 0 0;'>";
-					echo "<img class='post-thumbnail' src='" . $thumbnail_url . "' style='width: 100%; height: 100%; object-fit: cover;'></img>";
-					echo "</div>";
+					echo "<img class='post-thumbnail' src='" . $thumbnail_url . "' alt='thumbnail'{$attr}></img>";
 				}
 				echo "</header>";
 			}
