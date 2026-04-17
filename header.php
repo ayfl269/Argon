@@ -69,6 +69,9 @@
 	if(strpos($_SERVER['HTTP_USER_AGENT'], 'Safari') !== false && strpos($_SERVER['HTTP_USER_AGENT'], 'Chrome') === false){
 		$htmlclasses .= ' using-safari';
 	}
+	if (is_home() || is_front_page()){
+		$htmlclasses .= ' is-home';
+	}
 ?>
 <html <?php language_attributes(); ?> class="no-js <?php echo $htmlclasses;?>">
 <head>
@@ -79,6 +82,9 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
 	<?php } ?>
 	<link rel="profile" href="http://gmpg.org/xfn/11">
+	<link rel="dns-prefetch" href="//fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="dns-prefetch" href="//api.qrserver.com">
 
 	<meta property="og:site_name" content="<?php echo get_bloginfo('name');?>">
 	<meta property="og:title" content="<?php echo wp_get_document_title();?>">
@@ -139,7 +145,109 @@
 			--themecolor-gradient: linear-gradient(150deg, var(--themecolor-light) 15%, var(--themecolor) 70%, var(--themecolor-dark0) 94%);
 			--card-radius: <?php echo $cardradius; ?>px;
 		}
+		/* Optimize Font Loading to reduce CLS */
+		@font-face {
+			font-family: 'FontAwesome';
+			font-display: swap;
+		}
+		@font-face {
+			font-family: 'nucleo';
+			font-display: swap;
+		}
+		/* Reserve space for images to reduce CLS */
+		.post-thumbnail {
+			aspect-ratio: 16 / 9;
+			background-color: var(--color-border-on-foreground);
+		}
+		/* Stabilize navbar height */
+		#navbar-main {
+			min-height: 50px;
+		}
+		.navbar-nav .nav-link {
+			min-height: 40px;
+			display: inline-flex !important;
+			align-items: center;
+		}
+		.navbar-nav .nav-link i.fa, 
+		.navbar-nav .nav-link i.ni {
+			width: 1.25em;
+			text-align: center;
+		}
+		/* Stabilize banner title regardless of typing effect */
+		.banner-title {
+			line-height: 1.2;
+			min-height: 1.2em;
+		}
+		.banner-subtitle {
+			line-height: 1.5;
+			min-height: 1.5em;
+		}
+		/* Use a generic min-height to prevent footer jumping during JS load */
+		#main.article-list {
+			min-height: 400px;
+		}
+		/* Ensure navbar doesn't flick in absolute mode */
+		html.navbar-absolute #navbar-main {
+			position: absolute !important;
+		}
+		/* CRITICAL LAYOUT SKELETON: Adaptive space reservation */
+		.banner {
+			height: 71.8vh;
+			min-height: 400px;
+			display: block;
+		}
+		/* Fullscreen Banner Mode - ONLY on Home Page */
+		html.is-home.banner-as-cover .banner {
+			height: 100vh;
+		}
+		/* Mini Banner Mode */
+		html.banner-mini .banner {
+			height: 120px;
+			min-height: 120px;
+		}
+		/* No Banner Mode */
+		html.no-banner .banner {
+			display: none;
+		}
+		/* Content Offset Stabilization - Lowered weight to prevent side effects */
+		#content.site-content {
+			margin-top: -30vh;
+			position: relative;
+		}
+		/* Secondary conditions to reset offset when banner is not standard */
+		html.no-banner #content.site-content,
+		html.banner-mini #content.site-content,
+		html.is-home.banner-as-cover #content.site-content {
+			margin-top: 0;
+		}
+		/* Fix overlap in no-banner mode - Balanced value */
+		html.no-banner #content.site-content {
+			padding-top: 80px;
+		}
+		/* Ensure mask doesn't overlay incorrectly */
+		#navbar_menu_mask {
+			display: none;
+			z-index: 100;
+		}
+		/* Fix scrollbar layout jump (Layout Shift) */
+		html {
+			scrollbar-gutter: stable;
+		}
+		body.modal-open, 
+		body.leftbar-opened {
+			padding-right: 0 !important;
+		}
+		/* Ensure fixed elements stay centered */
+		.navbar-main, .page-background {
+			width: 100% !important;
+			left: 0 !important;
+		}
+		/* Ensure #primary has space during loading */
+		#main.article-list {
+			min-height: 400px;
+		}
 	</style>
+
 	<script>
 		document.documentElement.classList.remove("no-js");
 		var argonConfig = {
@@ -291,7 +399,7 @@
 
 <div id="toolbar">
 	<header class="header-global">
-		<nav id="navbar-main" class="navbar navbar-main navbar-expand-lg navbar-transparent navbar-light bg-primary headroom--not-bottom headroom--not-top headroom--pinned">
+		<nav id="navbar-main" class="navbar navbar-main navbar-expand-lg navbar-transparent navbar-light bg-primary headroom--not-bottom headroom--top headroom--pinned">
 			<div class="container">
 				<div class="navbar-brand mr-0">
 					<?php if ($options->get('toolbar_icon') != '') { ?>
@@ -386,9 +494,23 @@
 		<?php if ($enable_banner_title_typing_effect != "true"){?>
 			<div class="banner-title text-white"><span class="banner-title-inner"><?php echo apply_filters('argon_banner_title_html', $banner_title); ?></span>
 			<?php echo $options->get('banner_subtitle') == '' ? '' : '<span class="banner-subtitle d-block">' . $options->get('banner_subtitle') . '</span>'; ?></div>
-		<?php }else{ ?>
-			<div class="banner-title text-white" data-interval="<?php echo $options->get('banner_typing_effect_interval', 100); ?>"><span data-text="<?php echo $banner_title; ?>" class="banner-title-inner">&nbsp;</span>
-			<?php echo $options->get('banner_subtitle') == '' ? '' : '<span data-text="' . $options->get('banner_subtitle') . '" class="banner-subtitle d-block">&nbsp;</span>'; ?></div>
+		<?php }else{ 
+			$banner_subtitle = $options->get('banner_subtitle');
+		?>
+			<div class="banner-title text-white" data-interval="<?php echo $options->get('banner_typing_effect_interval', 100); ?>" style="position: relative;">
+				<!-- Ghost span to reserve space and prevent CLS -->
+				<span class="banner-title-inner" style="visibility: hidden; display: block; pointer-events: none;"><?php echo $banner_title; ?></span>
+				<!-- Actual animated span -->
+				<span data-text="<?php echo $banner_title; ?>" class="banner-title-inner" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">&nbsp;</span>
+			</div>
+			<?php if ($options->get('banner_subtitle_typing_effect', 'false') == 'true' && !empty($banner_subtitle)) { /*副标题打字效果*/?>
+				<div class="banner-subtitle text-white" data-interval="<?php echo $options->get('banner_typing_effect_interval', 100); ?>" style="position: relative; min-height: 1.5em; margin-top: 10px;">
+					<span class="banner-subtitle-inner" style="visibility: hidden; display: block; pointer-events: none;"><?php echo $banner_subtitle; ?></span>
+					<span data-text="<?php echo $banner_subtitle; ?>" class="banner-subtitle" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">&nbsp;</span>
+				</div>
+			<?php } else if (!empty($banner_subtitle)) { ?>
+				<div class="banner-subtitle text-white" style="margin-top: 10px;"><?php echo $banner_subtitle; ?></div>
+			<?php } ?>
 		<?php } ?>
 	</div>
 	<?php
