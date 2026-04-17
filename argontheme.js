@@ -605,9 +605,10 @@ if (argonConfig.waterflow_columns != "1") {
 	let $readingProgressDetails = $('#fabtn_reading_progress_details');
 
 	$backToTopBtn.on("click" , function(){
-		$("body,html").stop().animate({
-			scrollTop: 0
-		}, 800, 'easeOutExpo');
+		window.scrollTo({
+			top: 0,
+			behavior: 'smooth'
+		});
 	});
 
 	$toggleDarkmode.on("click" , function(){
@@ -817,9 +818,10 @@ $(document).on("click" , "#blog_setting_card_radius_to_default" , function(){
 		}else{
 			$("#post_comment").addClass("post-comment-force-privatemode-off");
 		}
-		$("body,html").animate({
-			scrollTop: $('#post_comment').offset().top - 100
-		}, 500, 'easeOutCirc');
+		window.scrollTo({
+			top: $('#post_comment').offset().top - 100,
+			behavior: 'smooth'
+		});
 		$('#post_comment_reply_info').slideDown(500, 'easeOutCirc');
 		setTimeout(function(){
 			$("#post_comment_content").focus();
@@ -862,9 +864,10 @@ $(document).on("click" , "#blog_setting_card_radius_to_default" , function(){
 		}else{
 			$("#post_comment").addClass("post-comment-force-privatemode-off");
 		}
-		$("body,html").animate({
-			scrollTop: $('#post_comment').offset().top - 100
-		}, 500, 'easeOutCirc');
+		window.scrollTo({
+			top: $('#post_comment').offset().top - 100,
+			behavior: 'smooth'
+		});
 		$("#post_comment_content").focus();
 	}
 	function cancelEdit(clear){
@@ -879,9 +882,10 @@ $(document).on("click" , "#blog_setting_card_radius_to_default" , function(){
 		edit(this.getAttribute("data-id"));
 	});
 	$(document).on("click", "#post_comment_edit_cancel", function(){
-		$("body,html").animate({
-			scrollTop: $("#comment-" + editID).offset().top - 100
-		}, 400, 'easeOutCirc');
+		window.scrollTo({
+			top: $("#comment-" + editID).offset().top - 100,
+			behavior: 'smooth'
+		});
 		cancelEdit(true);
 	});
 	$(document).on("pjax:click", function(){
@@ -1223,9 +1227,10 @@ $(document).on("click" , "#blog_setting_card_radius_to_default" , function(){
 				$("#post_comment_captcha_seed").val(result.newCaptchaSeed);
 				$("#post_comment_captcha + style").html(".post-comment-captcha-container:before{content: '" + result.newCaptcha + "';}");
 				$("#post_comment_captcha").val(result.newCaptchaAnswer);
-				$("body,html").animate({
-					scrollTop: $("#comment-" + result.id).offset().top - 100
-				}, 500, 'easeOutExpo');
+				window.scrollTo({
+					top: $("#comment-" + result.id).offset().top - 100,
+					behavior: 'smooth'
+				});
 			},
 			error: function(result){
 				$("#post_comment").removeClass("sending");
@@ -1369,9 +1374,10 @@ $(document).on("click" , "#blog_setting_card_radius_to_default" , function(){
 					icon: 'fa fa-check',
 					timeout: 5000
 				});
-				$("body,html").animate({
-					scrollTop: $("#comment-" + editID).offset().top - 100
-				}, 500, 'easeOutExpo');
+				window.scrollTo({
+					top: $("#comment-" + editID).offset().top - 100,
+					behavior: 'smooth'
+				});
 				editing = false;
 				editID = 0;
 				$("#post_comment_content").val("");
@@ -1465,9 +1471,32 @@ $(document).on("click" , ".comment-upvote" , function(){
 	});
 });
 /*评论表情面板*/
+let emotionObserver = null;
 function lazyloadStickers(){
-	$(".emotion-keyboard .emotion-group:not(d-none) .emotion-item > img.lazyload").lazyload({threshold: 500, effect: "fadeIn"}).removeClass("lazyload");
-	$("html").trigger("scroll");
+	if (emotionObserver){
+		emotionObserver.disconnect();
+	}
+	let stickersToLoad = $(".emotion-keyboard .emotion-group:not(.d-none) .emotion-item > img.lazyload");
+	if (stickersToLoad.length == 0){
+		return;
+	}
+	const observerOptions = {
+		root: document.querySelector(".emotion-keyboard"),
+		rootMargin: "50px",
+		threshold: 0.1
+	};
+	emotionObserver = new IntersectionObserver(function(entries, observer){
+		entries.forEach(function(entry){
+			if (entry.isIntersecting){
+				let img = $(entry.target);
+				img.attr("src", img.attr("data-original")).removeClass("lazyload");
+				observer.unobserve(entry.target);
+			}
+		});
+	}, observerOptions);
+	stickersToLoad.each(function(){
+		emotionObserver.observe(this);
+	});
 }
 $(document).on("click" , "#comment_emotion_btn" , function(){
 	$("#comment_emotion_btn").toggleClass("comment-emotion-keyboard-open");
@@ -1694,19 +1723,14 @@ $(document).on("submit" , ".post-password-form" , function(){
 }();
 
 /*URL 中 # 根据 ID 定位*/
-function gotoHash(hash, durtion, easing = 'easeOutExpo'){
-	if (hash.length == 0){
+function gotoHash(hash, duration, easing = 'easeOutExpo'){
+	if (hash.length == 0 || $(hash).length == 0){
 		return;
 	}
-	if ($(hash).length == 0){
-		return;
-	}
-	if (durtion == null){
-		durtion = 200;
-	}
-	$("body,html").stop().animate({
-		scrollTop: $(hash).offset().top - 80
-	}, durtion, easing);
+	window.scrollTo({
+		top: $(hash).offset().top - 80,
+		behavior: 'smooth'
+	});
 }
 function getHash(url){
 	return url.substring(url.indexOf('#'));
@@ -2514,7 +2538,9 @@ catalogInit();
 
 /*表情键盘*/
 function emotionKeyboardInit(){
-	$(".emotion-keyboard .emotion-group:not(d-none) .emotion-item > img.lazyload").lazyload({threshold: 500, effect: "fadeIn"}).removeClass("lazyload");
+	if ($(".emotion-keyboard").length > 0){
+		lazyloadStickers();
+	}
 }
 emotionKeyboardInit();
 
