@@ -231,7 +231,7 @@ class Template {
 		if ( isset( $post->ID ) ) {
 			$custom_css = get_post_meta( $post->ID, 'argon_custom_css', true );
 			if ( ! empty( $custom_css ) ) {
-				$content .= "<style>" . $custom_css . "</style>";
+				$content .= "<style>" . wp_strip_all_tags( $custom_css ) . "</style>";
 			}
 		}
 

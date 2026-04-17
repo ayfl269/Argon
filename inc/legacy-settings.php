@@ -295,7 +295,7 @@ function themeoptions_page(){
 								<option value="jsdelivr_cf" <?php if ($argon_assets_path=='jsdelivr_cf'){echo 'selected';} ?>>Jsdelivr (cf)</option>
 								<option value="custom" <?php if ($argon_assets_path=='custom'){echo 'selected';} ?>><?php _e('自定义...', 'argon');?></option>
 							</select>
-							<input type="text" class="regular-text" name="argon_custom_assets_path" placeholder="https://" value="<?php echo get_option('argon_custom_assets_path', ''); ?>" autocomplete="off">
+							<input type="text" class="regular-text" name="argon_custom_assets_path" placeholder="https://" value="<?php echo esc_attr(get_option('argon_custom_assets_path', '')); ?>" autocomplete="off">
 							<p class="description"><?php _e('选择主题资源文件的引用地址。使用 CDN 可以加速资源文件的访问并减少服务器压力。', 'argon');?></p>
 							<p class="description custom-assets-path-desctiption"><?php _e('在自定义路径中使用 <code>%theme_version%</code> 来表示主题版本号。', 'argon');?></p>
 						</td>
@@ -350,7 +350,7 @@ function themeoptions_page(){
 					<tr>
 						<th><label><?php _e('顶栏标题', 'argon');?></label></th>
 						<td>
-							<input type="text" class="regular-text" name="argon_toolbar_title" value="<?php echo get_option('argon_toolbar_title'); ?>"/></p>
+							<input type="text" class="regular-text" name="argon_toolbar_title" value="<?php echo esc_attr(get_option('argon_toolbar_title')); ?>"/></p>
 							<p class="description"><?php _e('留空则显示博客名称，输入 <code>--hidden--</code> 可以隐藏标题', 'argon');?></p>
 						</td>
 					</tr>
@@ -386,14 +386,14 @@ function themeoptions_page(){
 					<tr>
 						<th><label><?php _e('Banner 标题', 'argon');?></label></th>
 						<td>
-							<input type="text" class="regular-text" name="argon_banner_title" value="<?php echo get_option('argon_banner_title'); ?>"/>
+							<input type="text" class="regular-text" name="argon_banner_title" value="<?php echo esc_attr(get_option('argon_banner_title')); ?>"/>
 							<p class="description"><?php _e('留空则显示博客名称', 'argon');?></p>
 						</td>
 					</tr>
 					<tr>
 						<th><label><?php _e('Banner 副标题', 'argon');?></label></th>
 						<td>
-							<input type="text" class="regular-text" name="argon_banner_subtitle" value="<?php echo get_option('argon_banner_subtitle'); ?>"/>
+							<input type="text" class="regular-text" name="argon_banner_subtitle" value="<?php echo esc_attr(get_option('argon_banner_subtitle')); ?>"/>
 							<p class="description"><?php _e('显示在 Banner 标题下，留空则不显示', 'argon');?></p>
 						</td>
 					</tr>
@@ -974,7 +974,7 @@ function themeoptions_page(){
 							</select>
 							<?php _e('的方式提示', 'argon');?>
 							<br/>
-							<textarea type="text" name="argon_outdated_info_tip_content" rows="3" cols="100" style="margin-top: 15px;"><?php echo get_option('argon_outdated_info_tip_content') == '' ? __('本文最后更新于 %date_delta% 天前，其中的信息可能已经有所发展或是发生改变。', 'argpm') : get_option('argon_outdated_info_tip_content'); ?></textarea>
+							<textarea type="text" name="argon_outdated_info_tip_content" rows="3" cols="100" style="margin-top: 15px;"><?php echo esc_textarea(get_option('argon_outdated_info_tip_content') == '' ? __('本文最后更新于 %date_delta% 天前，其中的信息可能已经有所发展或是发生改变。', 'argpm') : get_option('argon_outdated_info_tip_content')); ?></textarea>
 							<p class="description"><?php _e('天数为 -1 表示永不提示。', 'argon');?><br/><code>%date_delta%</code> <?php _e('表示文章发布/修改时间与当前时间的差距，', 'argon');?><code>%post_date_delta%</code> <?php _e('表示文章发布时间与当前时间的差距，', 'argon');?><code>%modify_date_delta%</code> <?php _e('表示文章修改时间与当前时间的差距（单位: 天）。', 'argon');?></p>
 						</td>
 					</tr>

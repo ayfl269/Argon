@@ -595,6 +595,14 @@ class Core {
 			wp_send_json_success();
 		}
 
+		if ( $meta_key == 'argon_custom_css' ) {
+			$meta_value = wp_strip_all_tags( $meta_value );
+		} elseif ( $meta_key == 'argon_after_post' ) {
+			$meta_value = wp_kses_post( $meta_value );
+		} else {
+			$meta_value = sanitize_text_field( $meta_value );
+		}
+
 		$result = update_post_meta( $post_id, $meta_key, $meta_value );
 
 		if ( $result ) {
