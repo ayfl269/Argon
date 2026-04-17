@@ -121,6 +121,7 @@
 	<meta name="theme-card-radius-origin" content="<?php echo $cardradius_origin; ?>">
 
 	<meta name="theme-version" content="<?php echo ARGON_MODERN_VERSION; ?>">
+	<meta name="argon-nonce" content="<?php echo wp_create_nonce( 'argon_nonce' ); ?>">
 
 	<?php if ( is_singular() && pings_open( get_queried_object() ) ) : ?>
 	<link rel="pingback" href="<?php echo esc_url( get_bloginfo( 'pingback_url' ) ); ?>">

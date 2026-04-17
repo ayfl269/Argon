@@ -4,6 +4,9 @@ if (typeof(argonConfig) == "undefined"){
 if (typeof(argonConfig.wp_path) == "undefined"){
 	argonConfig.wp_path = "/";
 }
+if ($("meta[name='argon-nonce']").length > 0){
+	argonConfig.nonce = $("meta[name='argon-nonce']").attr("content");
+}
 /*Cookies 操作*/
 function setCookie(cname, cvalue, exdays) {
 	let d = new Date();
@@ -723,7 +726,7 @@ if (argonConfig.waterflow_columns != "1") {
 		}
 		function setReadingProgress(percent){
 			$readingProgressBtn.removeClass("fabtn-hidden");
-			$readingProgressDetails.html((percent * 100).toFixed(0) + "%");
+			$readingProgressDetails.text((percent * 100).toFixed(0) + "%");
 			$readingProgressBar.css("width" , (percent * 100).toFixed(0) + "%");
 		}
 		if ($("article.post.post-full").length == 0){
@@ -811,22 +814,25 @@ $(document).on("click" , "#blog_setting_card_radius_to_default" , function(){
 		cancelEdit(false);
 		replying = true;
 		replyID = commentID;
-		$("#post_comment_reply_name").html($("#comment-" + commentID + " .comment-item-title > .comment-name")[0].innerHTML);
-		let preview = $("#comment-" + commentID + " .comment-item-text")[0].innerHTML;
-		if ($("#comment-" + commentID + " .comment-item-source")[0].innerHTML != ''){
-			preview = $("#comment-" + commentID + " .comment-item-source")[0].innerHTML.replace(/\n/g, "</br>");
+		$("#post_comment_reply_name").text($("#comment-" + commentID + " .comment-item-title > .comment-name").text());
+		let preview = $("#comment-" + commentID + " .comment-item-text").text();
+		if ($("#comment-" + commentID + " .comment-item-source").text() != ''){
+			preview = $("#comment-" + commentID + " .comment-item-source").text();
 		}
-		$("#post_comment_reply_preview").html(preview);
+		$("#post_comment_reply_preview").text(preview);
 		if ($("#comment-" + commentID + " .comment-item-title .badge-private-comment").length > 0){
 			$("#post_comment").addClass("post-comment-force-privatemode-on");
 		}else{
 			$("#post_comment").addClass("post-comment-force-privatemode-off");
 		}
-		window.scrollTo({
-			top: $('#post_comment').offset().top - 100,
-			behavior: 'smooth'
-		});
-		$('#post_comment_reply_info').slideDown(500, 'easeOutCirc');
+		let $postComment = $('#post_comment');
+		if ($postComment.length > 0) {
+			window.scrollTo({
+				top: $postComment.offset().top - 100,
+				behavior: 'smooth'
+			});
+		}
+		$('#post_comment_reply_info').slideDown(500, 'swing');
 		setTimeout(function(){
 			$("#post_comment_content").focus();
 		}, 500);
@@ -834,7 +840,7 @@ $(document).on("click" , "#blog_setting_card_radius_to_default" , function(){
 	function cancelReply(){
 		replying = false;
 		replyID = 0;
-		$('#post_comment_reply_info').slideUp(300, 'easeOutCirc');
+		$('#post_comment_reply_info').slideUp(300, 'swing');
 		$("#post_comment").removeClass("post-comment-force-privatemode-on post-comment-force-privatemode-off");
 	}
 	$(document).on("click" , ".comment-reply" , function(){
@@ -868,10 +874,13 @@ $(document).on("click" , "#blog_setting_card_radius_to_default" , function(){
 		}else{
 			$("#post_comment").addClass("post-comment-force-privatemode-off");
 		}
-		window.scrollTo({
-			top: $('#post_comment').offset().top - 100,
-			behavior: 'smooth'
-		});
+		let $postComment = $('#post_comment');
+		if ($postComment.length > 0) {
+			window.scrollTo({
+				top: $postComment.offset().top - 100,
+				behavior: 'smooth'
+			});
+		}
 		$("#post_comment_content").focus();
 	}
 	function cancelEdit(clear){
@@ -886,10 +895,13 @@ $(document).on("click" , "#blog_setting_card_radius_to_default" , function(){
 		edit(this.getAttribute("data-id"));
 	});
 	$(document).on("click", "#post_comment_edit_cancel", function(){
-		window.scrollTo({
-			top: $("#comment-" + editID).offset().top - 100,
-			behavior: 'smooth'
-		});
+		let $targetComment = $("#comment-" + editID);
+		if ($targetComment.length > 0) {
+			window.scrollTo({
+				top: $targetComment.offset().top - 100,
+				behavior: 'smooth'
+			});
+		}
 		cancelEdit(true);
 	});
 	$(document).on("pjax:click", function(){
@@ -906,13 +918,13 @@ $(document).on("click" , "#blog_setting_card_radius_to_default" , function(){
 	});
 	//切换评论置顶状态
 	function toogleCommentPin(commentID, pinned){
-		$("#comment_pin_comfirm_dialog .modal-title").html(pinned ? __("取消置顶评论") : __("置顶评论"));
-		$("#comment_pin_comfirm_dialog .modal-body").html(pinned ? __("是否要取消置顶评论 #") + commentID + "?" : __("是否要置顶评论 #") + commentID + "?");
-		$("#comment_pin_comfirm_dialog .btn-comfirm").html(__("确认")).attr("disabled", false);
-		$("#comment_pin_comfirm_dialog .btn-dismiss").html(__("取消")).attr("disabled", false);
+		$("#comment_pin_comfirm_dialog .modal-title").text(pinned ? __("取消置顶评论") : __("置顶评论"));
+		$("#comment_pin_comfirm_dialog .modal-body").text(pinned ? __("是否要取消置顶评论 #") + commentID + "?" : __("是否要置顶评论 #") + commentID + "?");
+		$("#comment_pin_comfirm_dialog .btn-comfirm").text(__("确认")).attr("disabled", false);
+		$("#comment_pin_comfirm_dialog .btn-dismiss").text(__("取消")).attr("disabled", false);
 		$("#comment_pin_comfirm_dialog .btn-comfirm").off("click").on("click", function(){
 			$("#comment_pin_comfirm_dialog .btn-dismiss").attr("disabled", true)
-			$("#comment_pin_comfirm_dialog .btn-comfirm").attr("disabled", true).prepend(__(`<span class="btn-inner--icon" style="margin-right: 10px;"><i class="fa fa-spinner fa-spin"></i></span>`));
+			$("#comment_pin_comfirm_dialog .btn-comfirm").attr("disabled", true).prepend($('<span>', {class: 'btn-inner--icon', style: 'margin-right: 10px;'}).append($('<i>', {class: 'fa fa-spinner fa-spin'})));
 			$.ajax({
 				type: 'POST',
 				url: argonConfig.wp_path + "wp-admin/admin-ajax.php",
@@ -928,10 +940,10 @@ $(document).on("click" , "#blog_setting_card_radius_to_default" , function(){
 					if (result.status == "success"){
 						if (pinned){
 							$("#comment-" + commentID + " .comment-name .badge-pinned").remove();
-							$("#comment-" + commentID + " .comment-unpin").removeClass("comment-unpin").addClass("comment-pin").html(__("置顶"));
+							$("#comment-" + commentID + " .comment-unpin").removeClass("comment-unpin").addClass("comment-pin").text(__("置顶"));
 						}else{
 							$("#comment-" + commentID + " .comment-name").append(`<span class="badge badge-danger badge-pinned">${__("置顶")}</span>`);
-							$("#comment-" + commentID + " .comment-pin").removeClass("comment-pin").addClass("comment-unpin").html(__("取消置顶"));
+							$("#comment-" + commentID + " .comment-pin").removeClass("comment-pin").addClass("comment-unpin").text(__("取消置顶"));
 						}
 						iziToast.show({
 							title: pinned ? __("取消置顶成功") : __("置顶成功"),
@@ -988,9 +1000,9 @@ $(document).on("click" , "#blog_setting_card_radius_to_default" , function(){
 	$(document).on("click" , "#post_comment_toggle_extra_input" , function(){
 		$("#post_comment").toggleClass("show-extra-input");
 		if ($("#post_comment").hasClass("show-extra-input")){
-			$("#post_comment_extra_input").slideDown(300, 'easeOutCirc');
+			$("#post_comment_extra_input").slideDown(300, 'swing');
 		}else{
-			$("#post_comment_extra_input").slideUp(300, 'easeOutCirc');
+			$("#post_comment_extra_input").slideUp(300, 'swing');
 		}
 	});
 
@@ -1014,6 +1026,9 @@ $(document).on("click" , "#blog_setting_card_radius_to_default" , function(){
 
 	//发送评论
 	function postComment(){
+		if (typeof(argonConfig.nonce) == "undefined" || argonConfig.nonce == ""){
+			console.error("Argon Security: AJAX nonce is missing. 403 Forbidden is likely. Please check header.php or clear cache.");
+		}
 		let commentContent = $("#post_comment_content").val();
 		let commentName = $("#post_comment_name").val();
 		let commentEmail = $("#post_comment_email").val();
@@ -1114,8 +1129,8 @@ $(document).on("click" , "#blog_setting_card_radius_to_default" , function(){
 		$("#post_comment_link").attr("disabled","disabled");
 		$("#post_comment_send").attr("disabled","disabled");
 		$("#post_comment_reply_cancel").attr("disabled","disabled");
-		$("#post_comment_send .btn-inner--icon.hide-on-comment-editing").html("<i class='fa fa-spinner fa-spin'></i>");
-		$("#post_comment_send .btn-inner--text.hide-on-comment-editing").html(__("发送中"));
+		$("#post_comment_send .btn-inner--icon.hide-on-comment-editing").empty().append($('<i>', {class: 'fa fa-spinner fa-spin'}));
+		$("#post_comment_send .btn-inner--text.hide-on-comment-editing").text(__("发送中"));
 
 		iziToast.show({
 			title: __("正在发送"),
@@ -1129,7 +1144,7 @@ $(document).on("click" , "#blog_setting_card_radius_to_default" , function(){
 			progressBarColor: '#ffffff',
 			icon: 'fa fa-spinner fa-spin',
 			close: false,
-			timeout: 999999999
+			timeout: false
 		});
 
 		$.ajax({
@@ -1138,7 +1153,7 @@ $(document).on("click" , "#blog_setting_card_radius_to_default" , function(){
 			dataType : "json",
 			data: {
 				action: "ajax_post_comment",
-				nonce: argonConfig.nonce,
+				nonce: argonConfig.nonce || "",
 				comment: commentContent,
 				author: commentName,
 				email: commentEmail,
@@ -1160,8 +1175,8 @@ $(document).on("click" , "#blog_setting_card_radius_to_default" , function(){
 				$("#post_comment_link").removeAttr("disabled");
 				$("#post_comment_send").removeAttr("disabled");
 				$("#post_comment_reply_cancel").removeAttr("disabled");
-				$("#post_comment_send .btn-inner--icon.hide-on-comment-editing").html("<i class='fa fa-send'></i>");
-				$("#post_comment_send .btn-inner--text.hide-on-comment-editing").html(__("发送"));
+				$("#post_comment_send .btn-inner--icon.hide-on-comment-editing").empty().append($('<i>', {class: 'fa fa-send'}));
+				$("#post_comment_send .btn-inner--text.hide-on-comment-editing").text(__("发送"));
 				$("#post_comment").removeClass("show-extra-input post-comment-force-privatemode-on post-comment-force-privatemode-off");
 				if (!result.isAdmin){
 					$("#post_comment_captcha").removeAttr("disabled");
@@ -1169,7 +1184,7 @@ $(document).on("click" , "#blog_setting_card_radius_to_default" , function(){
 
 				//判断是否有错误
 				if (result.status == "failed"){
-					iziToast.destroy();
+					$(".iziToast").each(function() { iziToast.hide({}, this); });
 					iziToast.show({
 						title: __("评论发送失败"),
 						message: result.msg,
@@ -1187,7 +1202,7 @@ $(document).on("click" , "#blog_setting_card_radius_to_default" , function(){
 				}
 
 				//发送成功
-				iziToast.destroy();
+				$(".iziToast").each(function() { iziToast.hide({}, this); });
 				iziToast.show({
 					title: __("发送成功"),
 					message: __("您的评论已发送"),
@@ -1210,7 +1225,7 @@ $(document).on("click" , "#blog_setting_card_radius_to_default" , function(){
 				parentID = parseInt(parentID);
 				if (parentID == 0){
 					if ($("#comments > .card-body > ol.comment-list").length == 0){
-						$("#comments > .card-body").html("<h2 class='comments-title'><i class='fa fa-comments'></i> " + __("评论") + "</h2><ol class='comment-list'></ol>");
+						$("#comments > .card-body").empty().append($('<h2>', {class: 'comments-title'}).append($('<i>', {class: 'fa fa-comments'})).append(" " + __("评论"))).append($('<ol>', {class: 'comment-list'}));
 					}
 					if (result.commentOrder == "asc"){
 						$("#comments > .card-body > ol.comment-list").append(result.html);
@@ -1229,12 +1244,15 @@ $(document).on("click" , "#blog_setting_card_radius_to_default" , function(){
 				cancelReply();
 				$("#post_comment_content").val("");
 				$("#post_comment_captcha_seed").val(result.newCaptchaSeed);
-				$("#post_comment_captcha + style").html(".post-comment-captcha-container:before{content: '" + result.newCaptcha + "';}");
+				$("#post_comment_captcha + style").text(".post-comment-captcha-container:before{content: '" + result.newCaptcha + "';}");
 				$("#post_comment_captcha").val(result.newCaptchaAnswer);
-				window.scrollTo({
-					top: $("#comment-" + result.id).offset().top - 100,
-					behavior: 'smooth'
-				});
+				let $newComment = $("#comment-" + result.id);
+				if ($newComment.length > 0) {
+					window.scrollTo({
+						top: $newComment.offset().top - 100,
+						behavior: 'smooth'
+					});
+				}
 			},
 			error: function(result){
 				$("#post_comment").removeClass("sending");
@@ -1244,14 +1262,14 @@ $(document).on("click" , "#blog_setting_card_radius_to_default" , function(){
 				$("#post_comment_link").removeAttr("disabled");
 				$("#post_comment_send").removeAttr("disabled");
 				$("#post_comment_reply_cancel").removeAttr("disabled");
-				$("#post_comment_send .btn-inner--icon.hide-on-comment-editing").html("<i class='fa fa-send'></i>");
-				$("#post_comment_send .btn-inner--text.hide-on-comment-editing").html(__("发送"));
+				$("#post_comment_send .btn-inner--icon.hide-on-comment-editing").empty().append($('<i>', {class: 'fa fa-send'}));
+				$("#post_comment_send .btn-inner--text.hide-on-comment-editing").text(__("发送"));
 				$("#post_comment").removeClass("show-extra-input post-comment-force-privatemode-on post-comment-force-privatemode-off");
 				if (!result.isAdmin){
 					$("#post_comment_captcha").removeAttr("disabled");
 				}
 
-				iziToast.destroy();
+				$(".iziToast").each(function() { iziToast.hide({}, this); });
 				iziToast.show({
 					title: __("评论发送失败"),
 					message: __("未知原因"),
@@ -1299,8 +1317,8 @@ $(document).on("click" , "#blog_setting_card_radius_to_default" , function(){
 		$("#post_comment_content").attr("disabled","disabled");
 		$("#post_comment_send").attr("disabled","disabled");
 		$("#post_comment_edit_cancel").attr("disabled","disabled");
-		$("#post_comment_send .btn-inner--icon.hide-on-comment-not-editing").html("<i class='fa fa-spinner fa-spin'></i>");
-		$("#post_comment_send .btn-inner--text.hide-on-comment-not-editing").html(__("编辑中"));
+		$("#post_comment_send .btn-inner--icon.hide-on-comment-not-editing").empty().append($('<i>', {class: 'fa fa-spinner fa-spin'}));
+		$("#post_comment_send .btn-inner--text.hide-on-comment-not-editing").text(__("编辑中"));
 
 		iziToast.show({
 			title: __("正在编辑"),
@@ -1314,7 +1332,7 @@ $(document).on("click" , "#blog_setting_card_radius_to_default" , function(){
 			progressBarColor: '#ffffff',
 			icon: 'fa fa-spinner fa-spin',
 			close: false,
-			timeout: 999999999
+			timeout: false
 		});
 
 		$.ajax({
@@ -1331,12 +1349,12 @@ $(document).on("click" , "#blog_setting_card_radius_to_default" , function(){
 				$("#post_comment_content").removeAttr("disabled");
 				$("#post_comment_send").removeAttr("disabled");
 				$("#post_comment_edit_cancel").removeAttr("disabled");
-				$("#post_comment_send .btn-inner--icon.hide-on-comment-not-editing").html("<i class='fa fa-pencil'></i>");
-				$("#post_comment_send .btn-inner--text.hide-on-comment-not-editing").html(__("编辑"));
+				$("#post_comment_send .btn-inner--icon.hide-on-comment-not-editing").empty().append($('<i>', {class: 'fa fa-pencil'}));
+				$("#post_comment_send .btn-inner--text.hide-on-comment-not-editing").text(__("编辑"));
 
 				//判断是否有错误
 				if (result.status == "failed"){
-					iziToast.destroy();
+					$(".iziToast").each(function() { iziToast.hide({}, this); });
 					iziToast.show({
 						title: __("评论编辑失败"),
 						message: result.msg,
@@ -1355,16 +1373,16 @@ $(document).on("click" , "#blog_setting_card_radius_to_default" , function(){
 
 				//发送成功，替换原评论
 				result.new_comment = result.new_comment.replace(/<img class='comment-sticker lazyload'(.*?)\/>/g, "").replace(/<(\/).noscript>/g, "");		
-				$("#comment-" + editID + " .comment-item-text").html(result.new_comment);
-				$("#comment-" + editID + " .comment-item-source").html(result.new_comment_source);
+				$("#comment-" + editID + " .comment-item-text").empty().append(result.new_comment);
+				$("#comment-" + editID + " .comment-item-source").empty().append(result.new_comment_source);
 				if ($("#comment-" + editID + " .comment-info .comment-edited").length == 0){
-					$("#comment-" + editID + " .comment-info").prepend("<div class='comment-edited'><i class='fa fa-pencil' aria-hidden='true'></i>" + __("已编辑") + "</div>")
+					$("#comment-" + editID + " .comment-info").prepend($('<div>', {class: 'comment-edited'}).append($('<i>', {class: 'fa fa-pencil', 'aria-hidden': 'true'})).append(__("已编辑")));
 				}
 				if (result.can_visit_edit_history){
 					$("#comment-" + editID + " .comment-info .comment-edited").addClass("comment-edithistory-accessible");
 				}
 
-				iziToast.destroy();
+				$(".iziToast").each(function() { iziToast.hide({}, this); });
 				iziToast.show({
 					title: __("编辑成功"),
 					message: __("您的评论已编辑"),
@@ -1378,10 +1396,13 @@ $(document).on("click" , "#blog_setting_card_radius_to_default" , function(){
 					icon: 'fa fa-check',
 					timeout: 5000
 				});
-				window.scrollTo({
-					top: $("#comment-" + editID).offset().top - 100,
-					behavior: 'smooth'
-				});
+				let $editTarget = $("#comment-" + editID);
+				if ($editTarget.length > 0) {
+					window.scrollTo({
+						top: $editTarget.offset().top - 100,
+						behavior: 'smooth'
+					});
+				}
 				editing = false;
 				editID = 0;
 				$("#post_comment_content").val("");
@@ -1392,10 +1413,10 @@ $(document).on("click" , "#blog_setting_card_radius_to_default" , function(){
 				$("#post_comment_content").removeAttr("disabled");
 				$("#post_comment_send").removeAttr("disabled");
 				$("#post_comment_edit_cancel").removeAttr("disabled");
-				$("#post_comment_send .btn-inner--icon.hide-on-comment-not-editing").html("<i class='fa fa-pencil'></i>");
-				$("#post_comment_send .btn-inner--text.hide-on-comment-not-editing").html(__("编辑"));
+				$("#post_comment_send .btn-inner--icon.hide-on-comment-not-editing").empty().append($('<i>', {class: 'fa fa-pencil'}));
+				$("#post_comment_send .btn-inner--text.hide-on-comment-not-editing").text(__("编辑"));
 				if (result.readyState != 4 || result.status == 0){
-					iziToast.destroy();
+					$(".iziToast").each(function() { iziToast.hide({}, this); });
 					iziToast.show({
 						title: __("评论编辑失败"),
 						message: __("未知原因"),
@@ -1439,10 +1460,10 @@ $(document).on("click" , ".comment-upvote" , function(){
 		success : function(result){
 			$this.removeClass("comment-upvoting");
 			if (result.status == "success"){
-				$(".comment-upvote-num" , $this).html(result.total_upvote);
+				$(".comment-upvote-num" , $this).text(result.total_upvote);
 				$this.addClass("upvoted");
 			}else{
-				$(".comment-upvote-num" , $this).html(result.total_upvote);
+				$(".comment-upvote-num" , $this).text(result.total_upvote);
 				iziToast.show({
 					title: result.msg,
 					class: 'shadow-sm',
@@ -1536,8 +1557,8 @@ document.addEventListener('click', (e) => {
 function showCommentEditHistory(id){
 	let requestID = parseInt(new Date().getTime());
 	$("#comment_edit_history").data("request-id", requestID);
-	$("#comment_edit_history .modal-title").html(__("评论 #") + id + " " + __("的编辑记录"));
-	$("#comment_edit_history .modal-body").html("<div class='comment-history-loading'><span class='spinner-border text-primary'></span><span style='display: inline-block;transform: translateY(-4px);margin-left: 15px;font-size: 18px;'>加载中</span></div>");
+	$("#comment_edit_history .modal-title").text(__("评论 #") + id + " " + __("的编辑记录"));
+	$("#comment_edit_history .modal-body").empty().append($('<div>', {class: 'comment-history-loading'}).append($('<span>', {class: 'spinner-border text-primary'})).append($('<span>', {style: 'display: inline-block;transform: translateY(-4px);margin-left: 15px;font-size: 18px;'}).text("加载中")));
 	$("#comment_edit_history").modal(null);
 	$.ajax({
 		type: 'POST',
@@ -1553,7 +1574,7 @@ function showCommentEditHistory(id){
 				return;
 			}
 			$("#comment_edit_history .modal-body").hide();
-			$("#comment_edit_history .modal-body").html(result.history);
+			$("#comment_edit_history .modal-body").empty().append(result.history);
 			$("#comment_edit_history .modal-body").fadeIn(300);
 		},
 		error: function(result){
@@ -1561,7 +1582,7 @@ function showCommentEditHistory(id){
 				return;
 			}
 			$("#comment_edit_history .modal-body").hide();
-			$("#comment_edit_history .modal-body").html(__("加载失败"));
+			$("#comment_edit_history .modal-body").text(__("加载失败"));
 			$("#comment_edit_history .modal-body").fadeIn(300);
 		}
 	});
@@ -1580,7 +1601,7 @@ function foldLongComments(){
 		}
 		if (this.clientHeight > 800){
 			$(this).addClass("comment-folded");
-			$(this).append("<div class='show-full-comment'><button><i class='fa fa-angle-down' aria-hidden='true'></i> " + __("展开") + "</button></div>");
+			$(this).append($('<div>', {class: 'show-full-comment'}).append($('<button>').append($('<i>', {class: 'fa fa-angle-down', 'aria-hidden': 'true'})).append(" " + __("展开"))));
 		}
 	});
 }
@@ -1609,7 +1630,7 @@ function generateCommentTextAvatar(img){
 		text = img.parent().find("*[class*='comment-author']").text().trim()[0];
 	}
 	let classList = img.attr('class') + " text-avatar";
-	img.prop('outerHTML', '<div class="' + classList + '" style="background-color: ' + colors[hash] + ';">' + text + '</div>');
+	img.replaceWith($('<div>', {class: classList}).css('background-color', colors[hash]).text(text));
 }
 document.addEventListener("error", function(e){
 	let img = $(e.target);
@@ -1656,11 +1677,11 @@ $(document).on("submit" , ".post-password-form" , function(){
 			success : function(result){
 				NProgress.done();
 				$vdom = $(result);
-				$("#comments").html($("#comments", $vdom).html());
+				$("#comments").empty().append($vdom.find("#comments").contents());
 				$("#comments").removeClass("comments-loading");
 				$("body,html").animate({
 					scrollTop: $("#comments").offset().top - 100
-				}, 500, 'easeOutExpo');
+				}, 500, 'swing');
 				foldLongComments();
 				calcHumanTimesOnPage();
 				panguInit();
@@ -1685,10 +1706,10 @@ $(document).on("submit" , ".post-password-form" , function(){
 			success : function(result){
 				NProgress.done();
 				$vdom = $(result);
-				$("#comments > .card-body > ol.comment-list").append($("#comments > .card-body > ol.comment-list", $vdom).html());
+				$("#comments > .card-body > ol.comment-list").append($vdom.find("#comments > .card-body > ol.comment-list").contents());
 				if ($("#comments_more", $vdom).length == 0){
 					$("#comments_more").remove();
-					$(".comments-navigation-more").html("<div class='comments-navigation-nomore'>" + __("没有更多了") + "</div>");
+					$(".comments-navigation-more").empty().append($('<div>', {class: 'comments-navigation-nomore'}).text(__("没有更多了")));
 				}else{
 					$("#comments_more").attr("href", $("#comments_more", $vdom).attr("href"));
 					$("#comments_more").removeAttr("disabled");
@@ -1706,7 +1727,7 @@ $(document).on("submit" , ".post-password-form" , function(){
 }();
 
 /*URL 中 # 根据 ID 定位*/
-function gotoHash(hash, duration, easing = 'easeOutExpo'){
+function gotoHash(hash, duration, easing = 'swing'){
 	if (hash.length == 0 || $(hash).length == 0){
 		return;
 	}
@@ -1884,7 +1905,7 @@ new MutationObserver(function(mutations, observer){
 });
 if ($("html").hasClass("banner-as-cover")){
 	$(".cover-scroll-down").on("click" , function(){
-		gotoHash("#content", 600, 'easeOutCirc');
+		gotoHash("#content", 600, 'swing');
 		$("#content").focus();
 	});
 	$fabs = $("#float_action_buttons");
@@ -2043,7 +2064,7 @@ $(document).on("click", ".reference-link , .reference-list-backlink" , function(
 	$target = $($(this).attr("href"));
 	$("body,html").animate({
 		scrollTop: $target.offset().top - document.body.clientHeight / 2 - 75
-	}, 500, 'easeOutExpo')
+	}, 500, 'swing')
 	setTimeout(function(){
 		if ($target.is("li")){
 			$(".space", $target).focus();
@@ -2095,9 +2116,9 @@ $(document).on("click" , ".collapse-block .collapse-block-title" , function(){
 	$(block).toggleClass("collapsed");
 	let inner = $(".collapse-block-body", block);
 	if (block.hasClass("collapsed")){
-		inner.stop(true, false).slideUp(300, 'easeOutCirc');
+		inner.stop(true, false).slideUp(300, 'swing');
 	}else{
-		inner.stop(true, false).slideDown(300, 'easeOutCirc');
+		inner.stop(true, false).slideDown(300, 'swing');
 	}
 	$("html").trigger("scroll");
 });
@@ -2107,14 +2128,14 @@ function getGithubInfoCardContent(){
 	$(".github-info-card").each(function(){
 		(function($this){
 			if ($this.attr("data-getdata") == "backend"){
-				$(".github-info-card-description" , $this).html($this.attr("data-description"));
-				$(".github-info-card-stars" , $this).html($this.attr("data-stars"));
-				$(".github-info-card-forks" , $this).html($this.attr("data-forks"));
+				$(".github-info-card-description" , $this).text($this.attr("data-description"));
+				$(".github-info-card-stars" , $this).text($this.attr("data-stars"));
+				$(".github-info-card-forks" , $this).text($this.attr("data-forks"));
 				return;
 			}
-			$(".github-info-card-description" , $this).html("Loading...");
-			$(".github-info-card-stars" , $this).html("-");
-			$(".github-info-card-forks" , $this).html("-");
+			$(".github-info-card-description" , $this).text("Loading...");
+			$(".github-info-card-stars" , $this).text("-");
+			$(".github-info-card-forks" , $this).text("-");
 			author = $this.attr("data-author");
 			project = $this.attr("data-project");
 			$.ajax({
@@ -2122,19 +2143,19 @@ function getGithubInfoCardContent(){
 				type : "GET",
 				dataType : "json",
 				success : function(result){
-					description = result.description;
+					let description_node = $('<span>').text(result.description);
 					if (result.homepage != "" && result.homepage != null){
-						description += " <a href='" + result.homepage + "' target='_blank' no-pjax>" + result.homepage + "</a>"
+						description_node.append(" ").append($('<a>', {href: result.homepage, target: '_blank', 'no-pjax': ''}).text(result.homepage));
 					}
-					$(".github-info-card-description" , $this).html(description);
-					$(".github-info-card-stars" , $this).html(result.stargazers_count);
-					$(".github-info-card-forks" , $this).html(result.forks_count);
+					$(".github-info-card-description" , $this).empty().append(description_node);
+					$(".github-info-card-stars" , $this).text(result.stargazers_count);
+					$(".github-info-card-forks" , $this).text(result.forks_count);
 				},
 				error : function(xhr){
 					if (xhr.status == 404){
-						$(".github-info-card-description" , $this).html(__("找不到该 Repo"));
+						$(".github-info-card-description" , $this).text(__("找不到该 Repo"));
 					}else{
-						$(".github-info-card-description" , $this).html(__("获取 Repo 信息失败"));
+						$(".github-info-card-description" , $this).text(__("获取 Repo 信息失败"));
 					}
 				}
 			});
@@ -2160,7 +2181,7 @@ $(document).on("click" , ".shuoshuo-upvote" , function(){
 		success : function(result){
 			$this.removeClass("shuoshuo-upvoting");
 			if (result.status == "success"){
-				$(".shuoshuo-upvote-num" , $this).html(result.total_upvote);
+				$(".shuoshuo-upvote-num" , $this).text(result.total_upvote);
 				$("i.fa-thumbs-o-up" , $this).addClass("fa-thumbs-up").removeClass("fa-thumbs-o-up");
 				$this.addClass("upvoted");
 				$this.addClass("shuoshuo-upvoted-animation");
@@ -2178,7 +2199,7 @@ $(document).on("click" , ".shuoshuo-upvote" , function(){
 					timeout: 5000
 				});
 			}else{
-				$(".shuoshuo-upvote-num" , $this).html(result.total_upvote);
+				$(".shuoshuo-upvote-num" , $this).text(result.total_upvote);
 				iziToast.show({
 					title: result.msg,
 					message: "",
@@ -2223,7 +2244,7 @@ function foldLongShuoshuo(){
 		}
 		if (this.clientHeight > 400){
 			$(this).addClass("shuoshuo-folded");
-			$(this).append("<div class='show-full-shuoshuo'><button class='btn btn-outline-primary'><i class='fa fa-angle-down' aria-hidden='true'></i> " + __("展开") + "</button></div>");
+			$(this).append($('<div>', {class: 'show-full-shuoshuo'}).append($('<button>', {class: 'btn btn-outline-primary'}).append($('<i>', {class: 'fa fa-angle-down', 'aria-hidden': 'true'})).append(" " + __("展开"))));
 		}
 	});
 }
@@ -2554,6 +2575,9 @@ function getCodeFromBlock(block){
 		return codeOfBlocks[block.id];
 	}
 	let lines = $(".hljs-ln-code", block);
+	if (lines.length == 0){
+		return "";
+	}
 	let res = "";
 	for (let i = 0; i < lines.length - 1; i++){
 		res += lines[i].innerText;
@@ -2577,7 +2601,7 @@ function highlightJsRender(){
 		if ($(block).hasClass("no-hljs")){
 			return;
 		}
-		$(block).html("<code>" + $(block).html() + "</code>");
+		$(block).wrapInner("<code></code>");
 	});
 	$("article pre > code").each(function(index, block) {
 		if ($(block).hasClass("no-hljs")){
