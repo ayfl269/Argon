@@ -274,9 +274,13 @@
              * @param eid 标题的id值
              */
             scrollTo: function (eid) {
-                this.scrollBody.stop().animate({
-                    scrollTop: this.offsetTop(document.getElementById(eid.substr(1))) + 8
-                }, 'normal', 'easeOutExpo');
+                var target = document.getElementById(eid.substr(1));
+                if (!target) return;
+                var top = this.offsetTop(target) + 8;
+                window.scrollTo({
+                    top: top,
+                    behavior: 'smooth'
+                });
             },
             /**
              * 更新当前位置

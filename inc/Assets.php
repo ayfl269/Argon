@@ -33,7 +33,7 @@ class Assets {
 		wp_enqueue_style( 'nprogress' );
 
 		if ( $options->get( 'disable_googlefont' ) != 'true' ) {
-			wp_enqueue_style( 'googlefont', '//fonts.googleapis.com/css?family=Open+Sans:300,400,600,700|Noto+Serif+SC:300,600&display=swap', [], null );
+			wp_enqueue_style( 'googlefont', '//fonts.googleapis.com/css?family=Open+Sans:400,600,700|Noto+Serif+SC:600&display=swap', [], null );
 		}
 
 		// Conditional Styles
@@ -60,14 +60,11 @@ class Assets {
 		wp_register_script( 'bootstrap', self::get_asset_uri( '/assets/vendor/bootstrap/bootstrap.min.js' ), [ 'jquery', 'popper' ], $version, true );
 		wp_register_script( 'headroom', self::get_asset_uri( '/assets/vendor/headroom/headroom.min.js' ), [], $version, true );
 		wp_register_script( 'nprogress', self::get_asset_uri( '/assets/vendor/nprogress/nprogress.js' ), [], $version, true );
-		wp_register_script( 'lazyload', self::get_asset_uri( '/assets/vendor/lazyload/jquery.lazyload.min.js' ), [ 'jquery' ], $version, true );
-		wp_register_script( 'jquery-easing', self::get_asset_uri( '/assets/vendor/jquery.easing/jquery.easing.min.js' ), [ 'jquery' ], $version, true );
 		wp_register_script( 'clipboard', self::get_asset_uri( '/assets/vendor/clipboard/clipboard.min.js' ), [], $version, true );
 		wp_register_script( 'izitoast', self::get_asset_uri( '/assets/vendor/izitoast/js/iziToast.min.js' ), [], $version, true );
 		wp_register_script( 'pangu', self::get_asset_uri( '/assets/vendor/pangu/pangu.min.js' ), [], $version, true );
 		wp_register_script( 'clamp', self::get_asset_uri( '/assets/vendor/clamp/clamp.min.js' ), [], $version, true );
 		wp_register_script( 'tippy', self::get_asset_uri( '/assets/vendor/tippy.js/dist/tippy.umd.min.js' ), [ 'popper' ], $version, true );
-		wp_register_script( 'sharejs', self::get_asset_uri( '/assets/vendor/sharejs/share.min.js' ), [], $version, true );
 
 		// Conditional Vendors
 		if ( $options->get( 'enable_pjax' ) != 'false' ) {
@@ -88,9 +85,11 @@ class Assets {
 			wp_enqueue_script( 'zoomify' );
 		}
 
+/*
 		if ( $options->get( 'show_sharebtn' ) != 'false' ) {
 			wp_enqueue_script( 'sharejs' );
 		}
+*/
 
 		// Enqueue Core Vendors
 		wp_enqueue_script( 'jquery' );
@@ -99,8 +98,6 @@ class Assets {
 		wp_enqueue_script( 'bootstrap' );
 		wp_enqueue_script( 'headroom' );
 		wp_enqueue_script( 'nprogress' );
-		wp_enqueue_script( 'lazyload' );
-		wp_enqueue_script( 'jquery-easing' );
 		wp_enqueue_script( 'izitoast' );
 		wp_enqueue_script( 'clipboard' );
 		wp_enqueue_script( 'pangu' );
@@ -111,12 +108,7 @@ class Assets {
 		wp_enqueue_script( 'argon-nouislider', self::get_asset_uri( '/assets/vendor/nouislider/js/nouislider.min.js' ), [ 'jquery' ], $version, true );
 		wp_enqueue_script( 'argon-pickr', self::get_asset_uri( '/assets/vendor/pickr/pickr.min.js' ), [ 'jquery' ], $version, true );
 
-		// Smooth Scroll
-		$smooth_scroll_type = $options->get( 'enable_smoothscroll_type', '1' );
-		if ( $smooth_scroll_type != 'disabled' ) {
-			$scroll_script = 'smoothscroll' . str_replace( '_pulse', '_pulse', $smooth_scroll_type ) . '.js';
-			wp_enqueue_script( 'argon-smoothscroll', self::get_asset_uri( '/assets/vendor/smoothscroll/' . $scroll_script ), [ 'jquery' ], $version, true );
-		}
+
 
 		// Code Highlight
 		if ( $options->get( 'argon_enable_code_highlight' ) == 'true' ) {
@@ -128,7 +120,7 @@ class Assets {
 		wp_enqueue_script( 'argon-original-js', self::get_asset_uri( '/assets/js/argon.min.js' ), [ 'jquery', 'bootstrap' ], $version, true );
 		wp_add_inline_script( 'argon-original-js', 'window.$ = jQuery;', 'before' );
 		
-		$theme_deps = [ 'argon-original-js', 'izitoast', 'lazyload', 'clipboard' ];
+		$theme_deps = [ 'argon-original-js', 'izitoast', 'clipboard' ];
 		if ( $options->get( 'enable_pjax' ) != 'false' ) {
 			$theme_deps[] = 'pjax';
 		}
@@ -186,3 +178,17 @@ class Assets {
 		return $base_url . ( $path ? '/' . ltrim( $path, '/' ) : '' );
 	}
 }
+
+// Optimization: Defer non-essential scripts to eliminate render-blocking
+add_filter('script_loader_tag', function($tag, $handle) {
+	// Don't defer jQuery or core scripts that might be needed immediately
+	$skip_defer = ['jquery', 'jquery-core', 'jquery-migrate'];
+	if (in_array($handle, $skip_defer)) {
+		return $tag;
+	}
+	// Add defer attribute to all other scripts
+	if (strpos($tag, 'defer') === false) {
+		return str_replace(' src', ' defer src', $tag);
+	}
+	return $tag;
+}, 10, 2);

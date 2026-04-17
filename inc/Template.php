@@ -12,6 +12,9 @@ class Template {
 		add_filter( 'body_class', [ $this, 'body_class_filter' ] );
 		add_shortcode( 'friendlinks', [ $this, 'shortcode_friend_link' ] );
 		add_filter( 'pre_get_posts', [ $this, 'search_filter' ] );
+		add_filter( 'show_admin_bar', function( $show ) {
+			return Options::instance()->get( 'show_admin_bar' ) != 'false';
+		} );
 	}
 
 	public function shortcode_friend_link( $attr, $content = "" ) {
@@ -182,7 +185,7 @@ class Template {
 					$thumbnail_url = self::get_post_thumbnail( get_the_ID() );
 					$placeholder = self::get_thumbnail_placeholder( get_the_ID() );
 					$res .= '<div class="related-post-thumbnail-wrapper" style="aspect-ratio: 16/9; overflow: hidden; border-radius: 0.25rem;">';
-					$res .= '<img class="related-post-thumbnail lazyload" src="' . $placeholder . '" data-original="' . $thumbnail_url . '" style="width: 100%; height: 100%; object-fit: cover;"/>';
+					$res .= '<img class="related-post-thumbnail" src="' . $thumbnail_url . '" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;"/>';
 					$res .= '</div>';
 				}
 				$res .= '</a>';
@@ -294,14 +297,12 @@ class Template {
 				$placeholder = "data:image/svg+xml;base64,PCEtLUFyZ29uTG9hZGluZy0tPgo8c3ZnIHdpZHRoPSIxIiBoZWlnaHQ9IjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgc3Ryb2tlPSIjZmZmZmZmMDAiPjxnPjwvZz4KPC9zdmc+";
 				$style_attr = '';
 				if ($width && $height) {
-					$placeholder = "data:image/svg+xml;base64," . base64_encode("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 $width $height'></svg>");
 					$style_attr = " style=\"aspect-ratio: $width / $height; width: 100%; height: auto;\"";
 				}
 				
-				return "<img class=\"lazyload " . $lazyload_loading_style . "\" src=\"$placeholder\" $before data-original=\"$src\" $after$style_attr$closing";
+				return "<img class=\"lazyload-native " . $lazyload_loading_style . "\" src=\"$src\" $before loading=\"lazy\" $after$style_attr$closing";
 			}, $content );
-			$content = preg_replace( '/<img(.*?)data-full-url=[\'"]([^\'"]+)[\'"](.*)>/i', "<img$1data-full-url=\"$2\" data-original=\"$2\"$3>", $content );
-			$content = preg_replace( '/<img(.*?)srcset=[\'"](.*?)[\'"](.*?)>/i', "<img$1$3>", $content );
+			$content = preg_replace( '/<img(.*?)data-full-url=[\'"]([^\'"]+)[\'"](.*)>/i', "<img$1data-full-url=\"$2\"$3>", $content );
 		}
 		return $content;
 	}
@@ -309,11 +310,7 @@ class Template {
 	public static function argon_fancybox( $content ) {
 		$options = Options::instance();
 		if ( ! is_feed() && ! is_robots() && ! is_home() ) {
-			if ( $options->get( 'enable_lazyload' ) != 'false' ) {
-				$content = preg_replace( '/<img(.*?)data-original=[\'"](.*?)[\'"](.*?)((\/>)|>|(<\/img>))/i', "<div class='fancybox-wrapper lazyload-container-unload' data-fancybox='post-images' href='$2'>$0</div>", $content );
-			} else {
-				$content = preg_replace( '/<img(.*?)src=[\'"](.*?)[\'"](.*?)((\/>)|>|(<\/img>))/i', "<div class='fancybox-wrapper' data-fancybox='post-images' href='$2'>$0</div>", $content );
-			}
+			$content = preg_replace( '/<img(.*?)src=[\'"](.*?)[\'"](.*?)((\/>)|>|(<\/img>))/i', "<div class='fancybox-wrapper' data-fancybox='post-images' href='$2'>$0</div>", $content );
 		}
 		return $content;
 	}
@@ -773,7 +770,7 @@ class Template {
 		if ( post_password_required() ) {
 			return false;
 		}
-		if ( is_page() && is_page_template( 'archives.php' ) ) {
+		if ( is_page() && is_page_template( 'templates/archives.php' ) ) {
 			return true;
 		}
 		global $post;
