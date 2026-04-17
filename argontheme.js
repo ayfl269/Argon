@@ -647,6 +647,10 @@ if (argonConfig.waterflow_columns != "1") {
 	//博客设置
 	$toggleBlogSettings.on("click" , function(){
 		$("#float_action_buttons").toggleClass("blog_settings_opened");
+		if ($("#float_action_buttons").hasClass("blog_settings_opened")){
+			initPickr();
+			cardRadiusSliderInit();
+		}
 	});
 	$("#close_blog_settings").on("click" , function(){
 		$("#float_action_buttons").removeClass("blog_settings_opened");
@@ -791,7 +795,7 @@ function cardRadiusSliderInit(){
 		setCardRadius(value, true);
 	});
 }
-cardRadiusSliderInit();
+// cardRadiusSliderInit(); // Moved to lazy init in settings toggle
 $(document).on("click" , "#blog_setting_card_radius_to_default" , function(){
 	let slider = document.getElementById('blog_setting_card_radius');
 	slider.noUiSlider.set($("meta[name='theme-card-radius-origin']").attr("content"));
@@ -1471,32 +1475,11 @@ $(document).on("click" , ".comment-upvote" , function(){
 	});
 });
 /*评论表情面板*/
-let emotionObserver = null;
 function lazyloadStickers(){
-	if (emotionObserver){
-		emotionObserver.disconnect();
-	}
-	let stickersToLoad = $(".emotion-keyboard .emotion-group:not(.d-none) .emotion-item > img.lazyload");
-	if (stickersToLoad.length == 0){
-		return;
-	}
-	const observerOptions = {
-		root: document.querySelector(".emotion-keyboard"),
-		rootMargin: "50px",
-		threshold: 0.1
-	};
-	emotionObserver = new IntersectionObserver(function(entries, observer){
-		entries.forEach(function(entry){
-			if (entry.isIntersecting){
-				let img = $(entry.target);
-				img.attr("src", img.attr("data-original")).removeClass("lazyload");
-				observer.unobserve(entry.target);
-			}
-		});
-	}, observerOptions);
-	stickersToLoad.each(function(){
-		emotionObserver.observe(this);
+	$(".emotion-keyboard .emotion-group:not(.d-none) .emotion-item > img.lazyload").each(function(){
+		$(this).attr("src", $(this).attr("data-original")).removeClass("lazyload");
 	});
+	// $("html").trigger("scroll"); // Not needed anymore
 }
 $(document).on("click" , "#comment_emotion_btn" , function(){
 	$("#comment_emotion_btn").toggleClass("comment-emotion-keyboard-open");
@@ -2382,65 +2365,71 @@ function hex2str(hex){
 	return rgb2str(hex2rgb(hex));
 }
 //颜色选择器 & 切换主题色
-if ($("meta[name='argon-enable-custom-theme-color']").attr("content") == 'true'){
-	let themeColorPicker = new Pickr({
-		el: '#theme-color-picker',
-		container: 'body',
-		theme: 'monolith',
-		closeOnScroll: false,
-		appClass: 'theme-color-picker-box',
-		useAsButton: false,
-		padding: 8,
-		inline: false,
-		autoReposition: true,
-		sliders: 'h',
-		disabled: false,
-		lockOpacity: true,
-		outputPrecision: 0,
-		comparison: false,
-		default: $("meta[name='theme-color']").attr("content"),
-		swatches: ['#5e72e4', '#fa7298', '#009688', '#607d8b', '#2196f3', '#3f51b5', '#ff9700', '#109d58', '#dc4437', '#673bb7', '#212121', '#795547'],
-		defaultRepresentation: 'HEX',
-		showAlways: false,
-		closeWithKey: 'Escape',
-		position: 'top-start',
-		adjustableNumbers: false,
-		components: {
-			palette: true,
-			preview: true,
-			opacity: false,
-			hue: true,
-			interaction: {
-				hex: true,
-				rgba: true,
-				hsla: false,
-				hsva: false,
-				cmyk: false,
-				input: true,
-				clear: false,
-				cancel: true,
-				save: true
+var themeColorPicker = null;
+function initPickr(){
+	if (themeColorPicker != null){
+		return;
+	}
+	if ($("meta[name='argon-enable-custom-theme-color']").attr("content") == 'true' && $('#theme-color-picker').length > 0){
+		themeColorPicker = new Pickr({
+			el: '#theme-color-picker',
+			container: 'body',
+			theme: 'monolith',
+			closeOnScroll: false,
+			appClass: 'theme-color-picker-box',
+			useAsButton: false,
+			padding: 8,
+			inline: false,
+			autoReposition: true,
+			sliders: 'h',
+			disabled: false,
+			lockOpacity: true,
+			outputPrecision: 0,
+			comparison: false,
+			default: $("meta[name='theme-color']").attr("content"),
+			swatches: ['#5e72e4', '#fa7298', '#009688', '#607d8b', '#2196f3', '#3f51b5', '#ff9700', '#109d58', '#dc4437', '#673bb7', '#212121', '#795547'],
+			defaultRepresentation: 'HEX',
+			showAlways: false,
+			closeWithKey: 'Escape',
+			position: 'top-start',
+			adjustableNumbers: false,
+			components: {
+				palette: true,
+				preview: true,
+				opacity: false,
+				hue: true,
+				interaction: {
+					hex: true,
+					rgba: true,
+					hsla: false,
+					hsva: false,
+					cmyk: false,
+					input: true,
+					clear: false,
+					cancel: true,
+					save: true
+				}
+			},
+			strings: {
+				save: __('确定'),
+				clear: __('清除'),
+				cancel: __('恢复博客默认')
 			}
-		},
-		strings: {
-			save: __('确定'),
-			clear: __('清除'),
-			cancel: __('恢复博客默认')
-		}
-	});
-	themeColorPicker.on('change', instance => {
-		updateThemeColor(pickrObjectToHEX(instance), true);
-	})
-	themeColorPicker.on('save', (color, instance) => {
-		updateThemeColor(pickrObjectToHEX(instance._color), true);
-		themeColorPicker.hide();
-	})
-	themeColorPicker.on('cancel', instance => {
-		themeColorPicker.hide();
-		themeColorPicker.setColor($("meta[name='theme-color-origin']").attr("content").toUpperCase());
-		updateThemeColor($("meta[name='theme-color-origin']").attr("content").toUpperCase(), false);
-		setCookie("argon_custom_theme_color", "", 0);
-	});
+		});
+		themeColorPicker.on('change', instance => {
+			updateThemeColor(pickrObjectToHEX(instance), true);
+		})
+		themeColorPicker.on('save', (color, instance) => {
+			updateThemeColor(pickrObjectToHEX(instance._color), true);
+			themeColorPicker.hide();
+		})
+		themeColorPicker.on('cancel', instance => {
+			themeColorPicker.hide();
+			themeColorPicker.setColor($("meta[name='theme-color-origin']").attr("content").toUpperCase());
+			updateThemeColor($("meta[name='theme-color-origin']").attr("content").toUpperCase(), false);
+			setCookie("argon_custom_theme_color", "", 0);
+		});
+	}
 }
 function pickrObjectToHEX(color){
 	let HEXA = color.toHEXA();
@@ -2504,6 +2493,9 @@ function typeEffect($element, text, now, interval){
 	setTimeout(function(){typeEffect($element, text, now + 1, interval)}, interval);
 }
 function startTypeEffect($element, text, interval){
+	if (typeof text == "undefined" || text == null){
+		return;
+	}
 	$element.addClass("typing-effect");
 	$element.attr("style", "--animation-cnt: " + Math.ceil(text.length * interval / 1000));
 	typeEffect($element, text, 1, interval);
@@ -2511,13 +2503,16 @@ function startTypeEffect($element, text, interval){
 !function(){
 	if ($(".banner-title").data("interval") != undefined){
 		let interval = $(".banner-title").data("interval");
-		let $title = $(".banner-title-inner");
-		let $subTitle = $(".banner-subtitle");
-		startTypeEffect($title, $title.data("text"), interval);
+		let $title = $(".banner-title-inner[data-text]");
+		let $subTitle = $(".banner-subtitle[data-text]");
+		if ($title.length > 0){
+			startTypeEffect($title, $title.data("text"), interval);
+		}
 		if (!$subTitle.length){
 			return;
 		}
-		setTimeout(function(){startTypeEffect($subTitle, $subTitle.data("text"), interval);}, Math.ceil($title.data("text").length * interval / 1000) * 1000);
+		let titleText = $title.data("text") || "";
+		setTimeout(function(){startTypeEffect($subTitle, $subTitle.data("text"), interval);}, Math.ceil(titleText.length * interval / 1000) * 1000);
 	}
 }();
 
@@ -2538,9 +2533,7 @@ catalogInit();
 
 /*表情键盘*/
 function emotionKeyboardInit(){
-	if ($(".emotion-keyboard").length > 0){
-		lazyloadStickers();
-	}
+	// Emotion keyboard stickers loading is handled by lazyloadStickers now
 }
 emotionKeyboardInit();
 
