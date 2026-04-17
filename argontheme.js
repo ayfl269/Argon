@@ -1184,6 +1184,10 @@ $(document).on("click" , "#blog_setting_card_radius_to_default" , function(){
 
 				//判断是否有错误
 				if (result.status == "failed"){
+					if (result.newCaptchaSeed){
+						$("#post_comment_captcha_seed").val(result.newCaptchaSeed);
+						$("#post_comment_captcha + style").text(".post-comment-captcha-container:before{content: '" + result.newCaptcha + "';}");
+					}
 					$(".iziToast").each(function() { iziToast.hide({}, this); });
 					iziToast.show({
 						title: __("评论发送失败"),

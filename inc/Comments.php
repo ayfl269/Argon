@@ -437,18 +437,83 @@ class Comments {
 		if ( $options->get( 'argon_comment_need_captcha' ) == 'false' ) {
 			return $comment;
 		}
-		$answer = isset( $_POST['comment_captcha'] ) ? $_POST['comment_captcha'] : '';
 		if ( current_user_can( 'manage_options' ) ) {
 			return $comment;
 		}
-		$captcha = new CaptchaHelper( self::get_comment_captcha_seed() );
-		if ( ! ( $captcha->check( $answer ) ) ) {
+
+		$user_ip = $_SERVER['REMOTE_ADDR'];
+		$ip_lock_key = 'argon_captcha_lock_' . md5( $user_ip );
+
+		// Initialize session if not already done
+		if ( ! session_id() && ! headers_sent() ) {
+			session_start();
+		}
+
+		// Check Lock Status (Session or IP-based transient)
+		$is_locked = ( isset( $_SESSION['captcha_lock_until'] ) && $_SESSION['captcha_lock_until'] > time() );
+		$ip_lock_until = get_transient( $ip_lock_key );
+		
+		if ( $is_locked || $ip_lock_until ) {
+			$remaining = 0;
+			if ( $is_locked ) {
+				$remaining = $_SESSION['captcha_lock_until'] - time();
+			} else {
+				$remaining = $ip_lock_until - time();
+			}
+			
+			// Refresh captcha even on lock to show they are stalled
+			$newSeed = self::get_comment_captcha_seed( true );
 			wp_send_json( [
-				'status'  => 'failed',
-				'msg'     => __( '验证码错误', 'argon' ),
-				'isAdmin' => current_user_can( 'manage_options' )
+				'status'           => 'failed',
+				'msg'              => sprintf( __( '验证码错误次数过多，请在 %d 秒后重试', 'argon' ), $remaining ),
+				'isAdmin'          => current_user_can( 'manage_options' ),
+				'newCaptchaSeed'   => $newSeed,
+				'newCaptcha'       => self::get_comment_captcha( $newSeed )
 			] );
 		}
+
+		$seed = self::get_comment_captcha_seed();
+		$answer = isset( $_POST['comment_captcha'] ) ? $_POST['comment_captcha'] : '';
+		$captcha = new CaptchaHelper( $seed );
+
+		if ( ! ( $captcha->check( $answer ) ) ) {
+			$fail_count = isset( $_SESSION['captcha_fail_count'] ) ? (int) $_SESSION['captcha_fail_count'] : 0;
+			$fail_count++;
+			$_SESSION['captcha_fail_count'] = $fail_count;
+
+			if ( $fail_count >= 5 ) {
+				$lock_duration = 300; // 5 minutes
+				$_SESSION['captcha_lock_until'] = time() + $lock_duration;
+				set_transient( $ip_lock_key, time() + $lock_duration, $lock_duration );
+				$_SESSION['captcha_fail_count'] = 0;
+				
+				$newSeed = self::get_comment_captcha_seed( true );
+				wp_send_json( [
+					'status'           => 'failed',
+					'msg'              => __( '验证码错误次数过多，评论功能已锁定 5 分钟', 'argon' ),
+					'isAdmin'          => current_user_can( 'manage_options' ),
+					'newCaptchaSeed'   => $newSeed,
+					'newCaptcha'       => self::get_comment_captcha( $newSeed )
+				] );
+			}
+
+			$newSeed = self::get_comment_captcha_seed( true );
+			wp_send_json( [
+				'status'           => 'failed',
+				'msg'              => sprintf( __( '验证码错误 (还剩 %d 次机会)', 'argon' ), 5 - $fail_count ),
+				'isAdmin'          => current_user_can( 'manage_options' ),
+				'newCaptchaSeed'   => $newSeed,
+				'newCaptcha'       => self::get_comment_captcha( $newSeed )
+			] );
+		}
+
+		// Success: Reset fail counter and remove locks
+		$_SESSION['captcha_fail_count'] = 0;
+		if ( isset( $_SESSION['captcha_lock_until'] ) ) {
+			unset( $_SESSION['captcha_lock_until'] );
+		}
+		delete_transient( $ip_lock_key );
+
 		return $comment;
 	}
 
