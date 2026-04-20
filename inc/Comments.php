@@ -169,12 +169,16 @@ class Comments {
 	 * AJAX: Get captcha
 	 */
 	public function ajax_get_captcha() {
+		check_ajax_referer( 'argon_nonce', 'nonce' );
 		$options = Options::instance();
-		if ( $options->get( 'argon_get_captcha_by_ajax', 'false' ) != 'true' ) {
+		if ( $options->get( 'argon_comment_need_captcha' ) == 'false' ) {
 			return;
 		}
+		$newSeed = self::get_comment_captcha_seed( true );
 		wp_send_json( [
-			'captcha' => self::get_comment_captcha()
+			'status' => 'success',
+			'seed'    => $newSeed,
+			'captcha' => self::get_comment_captcha( $newSeed )
 		] );
 	}
 

@@ -1026,6 +1026,32 @@ $(document).on("click" , "#blog_setting_card_radius_to_default" , function(){
 	$(document).on("blur" , "#post_comment_captcha" , function(){
 		$(".post-comment-captcha-container").removeClass("active");
 	});
+	$(document).on("click" , ".post-comment-captcha-container" , function(){
+		let $container = $(this);
+		if ($container.hasClass("refreshing")){
+			return;
+		}
+		$container.addClass("refreshing");
+		$.ajax({
+			type: 'POST',
+			url: argonConfig.wp_path + "wp-admin/admin-ajax.php",
+			dataType : "json",
+			data: {
+				action: "get_captcha",
+				nonce: argonConfig.nonce || ""
+			},
+			success: function(result){
+				$container.removeClass("refreshing");
+				if (result.status == "success"){
+					$("#post_comment_captcha_seed").val(result.seed);
+					$("#post_comment_captcha + style").text(".post-comment-captcha-container:before{content: '" + result.captcha + "'; cursor: pointer;}");
+				}
+			},
+			error: function(){
+				$container.removeClass("refreshing");
+			}
+		});
+	});
 
 	//发送评论
 	function postComment(){
@@ -1189,7 +1215,7 @@ $(document).on("click" , "#blog_setting_card_radius_to_default" , function(){
 				if (result.status == "failed"){
 					if (result.newCaptchaSeed){
 						$("#post_comment_captcha_seed").val(result.newCaptchaSeed);
-						$("#post_comment_captcha + style").text(".post-comment-captcha-container:before{content: '" + result.newCaptcha + "';}");
+						$("#post_comment_captcha + style").text(".post-comment-captcha-container:before{content: '" + result.newCaptcha + "'; cursor: pointer;}");
 					}
 					$(".iziToast").each(function() { iziToast.hide({}, this); });
 					iziToast.show({
@@ -1251,7 +1277,7 @@ $(document).on("click" , "#blog_setting_card_radius_to_default" , function(){
 				cancelReply();
 				$("#post_comment_content").val("");
 				$("#post_comment_captcha_seed").val(result.newCaptchaSeed);
-				$("#post_comment_captcha + style").text(".post-comment-captcha-container:before{content: '" + result.newCaptcha + "';}");
+				$("#post_comment_captcha + style").text(".post-comment-captcha-container:before{content: '" + result.newCaptcha + "'; cursor: pointer;}");
 				$("#post_comment_captcha").val(result.newCaptchaAnswer);
 				let $newComment = $("#comment-" + result.id);
 				if ($newComment.length > 0) {

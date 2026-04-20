@@ -175,14 +175,15 @@ if ($enable_qq_avatar) {
 					</div>
 					<div class="<?php echo $col3_class;?>">
 						<div class="form-group">
-							<?php $captcha_seed = get_comment_captcha_seed(); ?>
+							<?php $captcha_seed = get_comment_captcha_seed(true); ?>
 							<div class="input-group input-group-alternative mb-4 post-comment-captcha-container" captcha="<?php echo get_comment_captcha($captcha_seed);?>">
 								<div class="input-group-prepend">
 									<span class="input-group-text"><i class="fa fa-key"></i></span>
 								</div>
 								<input id="post_comment_captcha" class="form-control" placeholder="<?php _e('验证码', 'argon');?>" type="text" <?php if (current_user_can('manage_options')) {echo('value="' . get_comment_captcha_answer($captcha_seed) . '" disabled');}?>>
 								<style>
-									.post-comment-captcha-container:before{ content: attr(captcha); }
+									.post-comment-captcha-container:before{ content: attr(captcha); cursor: pointer; }
+									.post-comment-captcha-container.refreshing:before{ opacity: 0.5; }
 								</style>
 							</div>
 						</div>
