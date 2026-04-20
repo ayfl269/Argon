@@ -180,8 +180,14 @@ class Assets {
 }
 
 // Optimization: Defer non-essential scripts to eliminate render-blocking
+// Optimization: Defer non-essential scripts to eliminate render-blocking
 add_filter('script_loader_tag', function($tag, $handle) {
-	// Don't defer jQuery or core interactive scripts to ensure TTI is not delayed
+	// 1. Never defer in admin area to avoid breaking core functionality
+	if (is_admin()) {
+		return $tag;
+	}
+
+	// 2. Explicit skip list for critical theme and common libraries
 	$skip_defer = [
 		'jquery', 
 		'jquery-core', 
@@ -193,11 +199,24 @@ add_filter('script_loader_tag', function($tag, $handle) {
 		'nprogress',
 		'pjax',
 		'argon-original-js', 
-		'argon-theme-js'
+		'argon-theme-js',
+		'moment'
 	];
+
 	if (in_array($handle, $skip_defer)) {
 		return $tag;
 	}
+
+	// 3. Automatically skip scripts that have inline data/after/before blocks
+	// This prevents "Cannot read properties of undefined" errors when inline scripts execute before deferred main scripts
+	global $wp_scripts;
+	if (isset($wp_scripts->registered[$handle])) {
+		$extra = $wp_scripts->registered[$handle]->extra;
+		if (!empty($extra['data']) || !empty($extra['after']) || !empty($extra['before'])) {
+			return $tag;
+		}
+	}
+
 	// Add defer attribute to all other scripts
 	if (strpos($tag, 'defer') === false) {
 		return str_replace(' src', ' defer src', $tag);
