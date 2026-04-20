@@ -181,8 +181,20 @@ class Assets {
 
 // Optimization: Defer non-essential scripts to eliminate render-blocking
 add_filter('script_loader_tag', function($tag, $handle) {
-	// Don't defer jQuery or core scripts that might be needed immediately
-	$skip_defer = ['jquery', 'jquery-core', 'jquery-migrate'];
+	// Don't defer jQuery or core interactive scripts to ensure TTI is not delayed
+	$skip_defer = [
+		'jquery', 
+		'jquery-core', 
+		'jquery-migrate', 
+		'popper', 
+		'bootstrap', 
+		'tippy',
+		'izitoast',
+		'nprogress',
+		'pjax',
+		'argon-original-js', 
+		'argon-theme-js'
+	];
 	if (in_array($handle, $skip_defer)) {
 		return $tag;
 	}

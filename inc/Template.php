@@ -137,6 +137,12 @@ class Template {
 			}
 		}
 
+		$cache_key = 'argon_related_posts_' . $post_id;
+		$cached_res = get_transient( $cache_key );
+		if ( $cached_res !== false ) {
+			return $cached_res;
+		}
+
 		$args = [
 			'posts_per_page'      => (int) $options->get( 'related_post_limit', 10 ),
 			'order'               => $options->get( 'related_post_sort_order', 'DESC' ),
@@ -192,8 +198,10 @@ class Template {
 			}
 			$res .= '</div></div></div>';
 			wp_reset_postdata();
+			set_transient( $cache_key, $res, HOUR_IN_SECONDS );
 			return $res;
 		}
+		set_transient( $cache_key, "", HOUR_IN_SECONDS );
 		return "";
 	}
 
@@ -713,7 +721,12 @@ class Template {
 				return preg_replace( '/ \[&hellip;]$/', '&hellip;', get_the_excerpt() );
 			}
 			if ( ! post_password_required() ) {
-				return htmlspecialchars( mb_substr( str_replace( "\n", '', strip_tags( $post->post_content ) ), 0, 50 ) ) . "...";
+				$content = $post->post_content;
+				// Performance: Pre-truncate if content is very long before stripping tags
+				if ( mb_strlen( $content ) > 500 ) {
+					$content = mb_substr( $content, 0, 500 );
+				}
+				return htmlspecialchars( mb_substr( str_replace( [ "\n", "\r" ], '', strip_tags( $content ) ), 0, 50 ) ) . "...";
 			} else {
 				return __( "这是一个加密页面，需要密码来查看", 'argon' );
 			}

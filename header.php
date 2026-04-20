@@ -494,7 +494,7 @@
 	<div id="banner_container" class="banner-container container text-center">
 		<?php if ($enable_banner_title_typing_effect != "true"){?>
 			<div class="banner-title text-white"><span class="banner-title-inner"><?php echo apply_filters('argon_banner_title_html', $banner_title); ?></span>
-			<?php echo $options->get('banner_subtitle') == '' ? '' : '<span class="banner-subtitle d-block">' . $options->get('banner_subtitle') . '</span>'; ?></div>
+			<?php echo $options->get('banner_subtitle') == '' ? '' : '<span class="banner-subtitle d-block">' . esc_html($options->get('banner_subtitle')) . '</span>'; ?></div>
 		<?php }else{ 
 			$banner_subtitle = $options->get('banner_subtitle');
 		?>

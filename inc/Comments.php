@@ -404,14 +404,15 @@ class Comments {
 			}
 		}
 		if ( isset( $_SESSION['captchaSeed'] ) && ! $refresh ) {
-			$res = $_SESSION['captchaSeed'];
-			if ( empty( $_POST ) ) {
-				session_write_close();
-			}
-			return $res;
+			return $_SESSION['captchaSeed'];
 		}
-		$captchaSeed             = rand( 0, 500000000 );
+		$captchaSeed             = bin2hex( random_bytes( 16 ) );
 		$_SESSION['captchaSeed'] = $captchaSeed;
+		
+		// Pre-calculate answer and store it in session for better security
+		$captcha = new CaptchaHelper( $captchaSeed );
+		$_SESSION['captcha_answer'] = (string) $captcha->getAnswer();
+		
 		session_write_close();
 		return $captchaSeed;
 	}
@@ -472,11 +473,10 @@ class Comments {
 			] );
 		}
 
-		$seed = self::get_comment_captcha_seed();
-		$answer = isset( $_POST['comment_captcha'] ) ? $_POST['comment_captcha'] : '';
-		$captcha = new CaptchaHelper( $seed );
+		$answer = isset( $_POST['comment_captcha'] ) ? trim( (string) $_POST['comment_captcha'] ) : '';
+		$correct_answer = isset( $_SESSION['captcha_answer'] ) ? (string) $_SESSION['captcha_answer'] : '';
 
-		if ( ! ( $captcha->check( $answer ) ) ) {
+		if ( $answer === '' || $correct_answer === '' || $answer !== $correct_answer ) {
 			$fail_count = isset( $_SESSION['captcha_fail_count'] ) ? (int) $_SESSION['captcha_fail_count'] : 0;
 			$fail_count++;
 			$_SESSION['captcha_fail_count'] = $fail_count;
@@ -1071,14 +1071,22 @@ class Comments {
 
 	public static function comment_format( $comment, $args, $depth ) {
 		$GLOBALS['comment'] = $comment;
+		$comment_id         = get_comment_ID();
+		$all_meta           = get_comment_meta( $comment_id );
+		
 		$options            = Options::instance();
 		$enable_upvote      = $options->get( "argon_enable_comment_upvote", "false" ) == "true";
 		$enable_pinning     = $options->get( "argon_enable_comment_pinning", "false" ) == "true";
 		$can_moderate       = current_user_can( 'moderate_comments' );
 
-		if ( ! ( isset( $comment->placeholder ) && $comment->placeholder ) && ( ! function_exists( 'user_can_view_comment' ) || user_can_view_comment( get_comment_ID() ) ) ) {
+		// Helper to safely get meta from the pre-fetched array
+		$get_meta = function( $key ) use ( $all_meta ) {
+			return isset( $all_meta[$key][0] ) ? $all_meta[$key][0] : '';
+		};
+
+		if ( ! ( isset( $comment->placeholder ) && $comment->placeholder ) && ( ! function_exists( 'user_can_view_comment' ) || user_can_view_comment( $comment_id ) ) ) {
 			?>
-			<li class="comment-item" id="comment-<?php comment_ID(); ?>" data-id="<?php comment_ID(); ?>" data-use-markdown="<?php echo get_comment_meta( get_comment_ID(), "use_markdown", true ); ?>">
+			<li class="comment-item" id="comment-<?php comment_ID(); ?>" data-id="<?php comment_ID(); ?>" data-use-markdown="<?php echo $get_meta( "use_markdown" ); ?>">
 				<div class="comment-item-left-wrapper">
 					<div class="comment-item-avatar">
 						<?php if ( function_exists( 'get_avatar' ) && get_option( 'show_avatars' ) ) {
@@ -1105,10 +1113,10 @@ class Comments {
 							<?php if ( function_exists( 'get_comment_parent_info' ) ) {
 								echo get_comment_parent_info( $comment );
 							} ?>
-							<?php if ( $enable_pinning && get_comment_meta( get_comment_ID(), "pinned", true ) == "true" ) {
+							<?php if ( $enable_pinning && $get_meta( "pinned" ) == "true" ) {
 								echo '<span class="badge badge-danger badge-pinned"><i class="fa fa-thumb-tack" aria-hidden="true"></i> ' . _x( '置顶', 'pinned', 'argon' ) . '</span>';
 							} ?>
-							<?php if ( function_exists( 'is_comment_private_mode' ) && is_comment_private_mode( get_comment_ID() ) && ( ! function_exists( 'user_can_view_comment' ) || user_can_view_comment( get_comment_ID() ) ) ) {
+							<?php if ( function_exists( 'is_comment_private_mode' ) && is_comment_private_mode( $comment_id ) && ( ! function_exists( 'user_can_view_comment' ) || user_can_view_comment( $comment_id ) ) ) {
 								echo '<span class="badge badge-success badge-private-comment">' . __( '悄悄话', 'argon' ) . '</span>';
 							}
 							?>
@@ -1123,8 +1131,8 @@ class Comments {
 							?>
 						</div>
 						<div class="comment-info">
-							<?php if ( get_comment_meta( get_comment_ID(), "edited", true ) == "true" ) { ?>
-								<div class="comment-edited<?php if ( function_exists( 'can_visit_comment_edit_history' ) && can_visit_comment_edit_history( get_comment_ID() ) ) {
+							<?php if ( $get_meta( "edited" ) == "true" ) { ?>
+								<div class="comment-edited<?php if ( function_exists( 'can_visit_comment_edit_history' ) && can_visit_comment_edit_history( $comment_id ) ) {
 									echo ' comment-edithistory-accessible';
 								} ?>">
 									<i class="fa fa-pencil" aria-hidden="true"></i><?php _e( '已编辑', 'argon' ) ?>
@@ -1139,11 +1147,11 @@ class Comments {
 					<div class="comment-item-text">
 						<?php echo function_exists( 'argon_get_comment_text' ) ? argon_get_comment_text() : get_comment_text(); ?>
 					</div>
-					<div class="comment-item-source" style="display: none;" aria-hidden="true"><?php echo htmlspecialchars( get_comment_meta( get_comment_ID(), "comment_content_source", true ) ); ?></div>
+					<div class="comment-item-source" style="display: none;" aria-hidden="true"><?php echo htmlspecialchars( $get_meta( "comment_content_source" ) ); ?></div>
 
 					<div class="comment-operations">
-						<?php if ( $enable_pinning && $can_moderate && function_exists( 'is_comment_pinable' ) && is_comment_pinable( get_comment_ID() ) ) {
-							if ( get_comment_meta( get_comment_ID(), "pinned", true ) == "true" ) { ?>
+						<?php if ( $enable_pinning && $can_moderate && function_exists( 'is_comment_pinable' ) && is_comment_pinable( $comment_id ) ) {
+							if ( $get_meta( "pinned" ) == "true" ) { ?>
 								<button class="comment-unpin btn btn-sm btn-outline-primary" data-id="<?php comment_ID(); ?>" type="button" style="margin-right: 2px;"><?php _e( '取消置顶', 'argon' ) ?></button>
 							<?php } else { ?>
 								<button class="comment-pin btn btn-sm btn-outline-primary" data-id="<?php comment_ID(); ?>" type="button" style="margin-right: 2px;"><?php _ex( '置顶', 'to pin', 'argon' ) ?></button>
@@ -1199,7 +1207,12 @@ class CaptchaHelper {
 	}
 
 	public function getChallenge() {
-		mt_srand( $this->captchaSeed + 10007 );
+		if ( ! is_numeric( $this->captchaSeed ) ) {
+			// If seed is a hex string, use it to seed mt_rand
+			mt_srand( hexdec( substr( $this->captchaSeed, 0, 8 ) ) + 10007 );
+		} else {
+			mt_srand( $this->captchaSeed + 10007 );
+		}
 		$oper = mt_rand( 1, 4 );
 		switch ( $oper ) {
 			case 1:
@@ -1223,7 +1236,11 @@ class CaptchaHelper {
 	}
 
 	public function getAnswer() {
-		mt_srand( $this->captchaSeed + 10007 );
+		if ( ! is_numeric( $this->captchaSeed ) ) {
+			mt_srand( hexdec( substr( $this->captchaSeed, 0, 8 ) ) + 10007 );
+		} else {
+			mt_srand( $this->captchaSeed + 10007 );
+		}
 		$oper = mt_rand( 1, 4 );
 		switch ( $oper ) {
 			case 1:

@@ -319,6 +319,9 @@ if (typeof $.pjax === "undefined") {
 		form.submit();
 	};
 	$.pjax.defaults = {};
+	$.fn.pjax = function() {
+		return this;
+	};
 }
 
 /*iziToast 兼容性降级*/
@@ -1871,6 +1874,9 @@ clampInit();
 
 /*Tippy.js*/
 function tippyInit(){
+	if (typeof tippy === "undefined"){
+		return;
+	}
 	//Reference Popover
 	tippy('sup.reference[data-content]:not(.tippy-initialized)', {
 		content: (reference) => reference.getAttribute('data-content'),
