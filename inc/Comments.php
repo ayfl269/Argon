@@ -572,9 +572,7 @@ class Comments {
 		update_comment_meta( $id, "comment_content_source", isset( $_POST['comment_content_source'] ) ? $_POST['comment_content_source'] : '' );
 
 		// 评论者 Token
-		if ( function_exists( 'set_user_token_cookie' ) ) {
-			set_user_token_cookie();
-		}
+		set_user_token_cookie();
 		if ( isset( $_COOKIE["argon_user_token"] ) ) {
 			update_comment_meta( $id, "user_token", $_COOKIE["argon_user_token"] );
 		}
@@ -613,9 +611,7 @@ class Comments {
 		// 是否启用邮件通知
 		if ( isset( $_POST['enable_mailnotice'] ) && $_POST['enable_mailnotice'] == 'true' && $options->get( "argon_comment_allow_mailnotice" ) == "true" ) {
 			update_comment_meta( $id, "enable_mailnotice", "true" );
-			if ( function_exists( 'get_random_token' ) ) {
-				update_comment_meta( $id, "mailnotice_unsubscribe_key", get_random_token() );
-			}
+			update_comment_meta( $id, "mailnotice_unsubscribe_key", get_random_token() );
 		} else {
 			update_comment_meta( $id, "enable_mailnotice", "false" );
 		}
@@ -794,7 +790,11 @@ class Comments {
 		if ( ! isset( $_COOKIE['argon_user_token'] ) || strlen( $_COOKIE['argon_user_token'] ) != 32 ) {
 			return false;
 		}
-		if ( $_COOKIE['argon_user_token'] != get_comment_meta( $id, "user_token", true ) ) {
+		$stored_token = get_comment_meta( $id, "user_token", true );
+		if ( ! is_string( $stored_token ) || $stored_token === '' ) {
+			return false;
+		}
+		if ( ! hash_equals( $stored_token, $_COOKIE['argon_user_token'] ) ) {
 			return false;
 		}
 		return true;
@@ -915,6 +915,11 @@ class Comments {
 
 		$comment_query = new \WP_Comment_Query;
 		$comments      = $comment_query->query( $args );
+
+		// 预热评论 meta 缓存，避免排序与渲染时的 N+1 查询
+		if ( ! empty( $comments ) ) {
+			update_meta_cache( 'comment', wp_list_pluck( $comments, 'comment_ID' ) );
+		}
 
 		$options = Options::instance();
 		if ( $options->get( "argon_enable_comment_pinning", "false" ) == "true" ) {
@@ -1202,6 +1207,9 @@ class Comments {
 
 /**
  * Internal Captcha Helper
+ *
+ * 答案使用 random_int (CSPRNG) 生成，仅存储于 session。
+ * 种子不再用于派生答案，仅作为不透明标识符传给前端，避免客户端复算。
  */
 class CaptchaHelper {
 	private $captchaSeed;
@@ -1210,61 +1218,70 @@ class CaptchaHelper {
 		$this->captchaSeed = $seed;
 	}
 
-	public function getChallenge() {
-		if ( ! is_numeric( $this->captchaSeed ) ) {
-			// If seed is a hex string, use it to seed mt_rand
-			mt_srand( hexdec( substr( $this->captchaSeed, 0, 8 ) ) + 10007 );
-		} else {
-			mt_srand( $this->captchaSeed + 10007 );
+	private static function ensure_session() {
+		if ( ! session_id() && ! headers_sent() ) {
+			session_set_cookie_params( [
+				'httponly' => true,
+				'samesite' => 'Strict',
+				'secure'   => is_ssl(),
+			] );
+			session_start();
 		}
-		$oper = mt_rand( 1, 4 );
+	}
+
+	private function generate() {
+		self::ensure_session();
+		$oper = random_int( 1, 4 );
 		switch ( $oper ) {
 			case 1:
-				$num1 = mt_rand( 1, 20 );
-				$num2 = mt_rand( 0, 20 - $num1 );
-				return $num1 . " + " . $num2 . " = ";
+				$num1 = random_int( 1, 20 );
+				$num2 = random_int( 0, 20 - $num1 );
+				$challenge = $num1 . " + " . $num2 . " = ";
+				$answer     = $num1 + $num2;
+				break;
 			case 2:
-				$num1 = mt_rand( 10, 20 );
-				$num2 = mt_rand( 1, $num1 );
-				return $num1 . " - " . $num2 . " = ";
+				$num1 = random_int( 10, 20 );
+				$num2 = random_int( 1, $num1 );
+				$challenge = $num1 . " - " . $num2 . " = ";
+				$answer     = $num1 - $num2;
+				break;
 			case 3:
-				$num1 = mt_rand( 3, 9 );
-				$num2 = mt_rand( 3, 9 );
-				return $num1 . " * " . $num2 . " = ";
+				$num1 = random_int( 3, 9 );
+				$num2 = random_int( 3, 9 );
+				$challenge = $num1 . " * " . $num2 . " = ";
+				$answer     = $num1 * $num2;
+				break;
 			case 4:
-				$num2 = mt_rand( 2, 9 );
-				$num1 = $num2 * mt_rand( 2, 9 );
-				return $num1 . " / " . $num2 . " = ";
+				$num2 = random_int( 2, 9 );
+				$num1 = $num2 * random_int( 2, 9 );
+				$challenge = $num1 . " / " . $num2 . " = ";
+				$answer     = $num1 / $num2;
+				break;
+			default:
+				$challenge = '';
+				$answer     = '';
 		}
-		return "";
+		$_SESSION['captcha_seed']      = $this->captchaSeed;
+		$_SESSION['captcha_challenge'] = $challenge;
+		$_SESSION['captcha_answer']    = (string) $answer;
+	}
+
+	public function getChallenge() {
+		self::ensure_session();
+		if ( isset( $_SESSION['captcha_seed'] ) && $_SESSION['captcha_seed'] === $this->captchaSeed && isset( $_SESSION['captcha_challenge'] ) ) {
+			return $_SESSION['captcha_challenge'];
+		}
+		$this->generate();
+		return isset( $_SESSION['captcha_challenge'] ) ? $_SESSION['captcha_challenge'] : '';
 	}
 
 	public function getAnswer() {
-		if ( ! is_numeric( $this->captchaSeed ) ) {
-			mt_srand( hexdec( substr( $this->captchaSeed, 0, 8 ) ) + 10007 );
-		} else {
-			mt_srand( $this->captchaSeed + 10007 );
+		self::ensure_session();
+		if ( isset( $_SESSION['captcha_seed'] ) && $_SESSION['captcha_seed'] === $this->captchaSeed && isset( $_SESSION['captcha_answer'] ) ) {
+			return $_SESSION['captcha_answer'];
 		}
-		$oper = mt_rand( 1, 4 );
-		switch ( $oper ) {
-			case 1:
-				$num1 = mt_rand( 1, 20 );
-				$num2 = mt_rand( 0, 20 - $num1 );
-				return $num1 + $num2;
-			case 2:
-				$num1 = mt_rand( 10, 20 );
-				$num2 = mt_rand( 1, $num1 );
-				return $num1 - $num2;
-			case 3:
-				$num1 = mt_rand( 3, 9 );
-				$num2 = mt_rand( 3, 9 );
-				return $num1 * $num2;
-			case 4:
-				$num2 = mt_rand( 2, 9 );
-				$num1 = $num2 * mt_rand( 2, 9 );
-				return $num1 / $num2;
-		}
-		return "";
+		$this->generate();
+		return isset( $_SESSION['captcha_answer'] ) ? $_SESSION['captcha_answer'] : '';
 	}
 
 	public function check( $answer ) {

@@ -48,9 +48,9 @@ class Template {
 				<div class='link mb-2 col-lg-6 col-md-6'>
 					<div class='card shadow-sm friend-link-container" . ( $friendlink->link_image == "" ? " no-avatar" : "" ) . "'>";
 			if ( $friendlink->link_image != '' ) {
-				$out .= "
-						<img src='" . $friendlink->link_image . "' class='friend-link-avatar bg-gradient-secondary'>";
-			}
+			$out .= "
+					<img src='" . esc_url( $friendlink->link_image ) . "' class='friend-link-avatar bg-gradient-secondary'>";
+		}
 			$out .= "	<div class='friend-link-content'>
 							<div class='friend-link-title title text-primary'>
 								<a target='_blank' href='" . esc_url( $friendlink->link_url ) . "'>" . esc_html( $friendlink->link_name ) . "</a>

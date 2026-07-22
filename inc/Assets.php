@@ -104,9 +104,11 @@ class Assets {
 		wp_enqueue_script( 'clamp' );
 		wp_enqueue_script( 'tippy' );
 
-		// Optional UI Vendors (Pickr/NoUiSlider)
-		wp_enqueue_script( 'argon-nouislider', self::get_asset_uri( '/assets/vendor/nouislider/js/nouislider.min.js' ), [ 'jquery' ], $version, true );
-		wp_enqueue_script( 'argon-pickr', self::get_asset_uri( '/assets/vendor/pickr/pickr.min.js' ), [ 'jquery' ], $version, true );
+		// Optional UI Vendors (Pickr/NoUiSlider) - 仅在 FAB 设置按钮启用时加载
+		if ( $options->get( 'fab_show_settings_button' ) != 'false' ) {
+			wp_enqueue_script( 'argon-nouislider', self::get_asset_uri( '/assets/vendor/nouislider/js/nouislider.min.js' ), [ 'jquery' ], $version, true );
+			wp_enqueue_script( 'argon-pickr', self::get_asset_uri( '/assets/vendor/pickr/pickr.min.js' ), [ 'jquery' ], $version, true );
+		}
 
 
 
@@ -200,7 +202,21 @@ add_filter('script_loader_tag', function($tag, $handle) {
 		'pjax',
 		'argon-original-js', 
 		'argon-theme-js',
-		'moment'
+		'moment',
+		// WordPress core scripts
+		'underscore',
+		'wp-util',
+		'wp-backbone',
+		'media-models',
+		'media-views',
+		'media-editor',
+		'media-audiovideo',
+		'mce-view',
+		'wp-api',
+		'wp-hooks',
+		'wp-i18n',
+		'wp-a11y',
+		'wp-dom-ready'
 	];
 
 	if (in_array($handle, $skip_defer)) {

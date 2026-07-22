@@ -45,7 +45,7 @@ class Core {
 		// Login page style
 		if ( $options->get( 'enable_login_css' ) == 'true' ) {
 			add_action( 'login_head', [ $this, 'login_page_style' ] );
-		}
+					}
 
 		// Performance: Cache headers
 		add_action( 'send_headers', [ $this, 'add_cache_control_headers' ] );
@@ -425,6 +425,13 @@ class Core {
 	}
 
 	public function add_cache_control_headers() {
+		// 登录用户与后台请求不应被 CDN/反代缓存，避免泄露个性化内容（管理栏、评论表单预填等）
+		if ( is_user_logged_in() || is_admin() ) {
+			header( "Cache-Control: no-cache, must-revalidate, max-age=0" );
+			header( "Pragma: no-cache" );
+			header( "Expires: " . gmdate( "D, d M Y H:i:s", 0 ) . " GMT" );
+			return;
+		}
 		header( "Cache-Control: max-age=604800, must-revalidate" );
 		header( "Pragma: cache" );
 		header( "Expires: " . gmdate( "D, d M Y H:i:s", time() + 3600 ) . " GMT" );

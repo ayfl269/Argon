@@ -302,9 +302,9 @@ class Shortcodes {
 				<div class='link mb-2 col-lg-6 col-md-6'>
 					<div class='card shadow-sm friend-link-container" . ( $friendlink->link_image == "" ? " no-avatar" : "" ) . "'>";
 			if ( $friendlink->link_image != '' ) {
-				$out .= "
-						<img src='" . $friendlink->link_image . "' class='friend-link-avatar bg-gradient-secondary'>";
-			}
+			$out .= "
+					<img src='" . esc_url( $friendlink->link_image ) . "' class='friend-link-avatar bg-gradient-secondary'>";
+		}
 			$out .= "	<div class='friend-link-content'>
 							<div class='friend-link-title title text-primary'>
 								<a target='_blank' href='" . esc_url( $friendlink->link_url ) . "'>" . esc_html( $friendlink->link_name ) . "</a>
@@ -473,23 +473,33 @@ class Shortcodes {
 		$forks       = "";
 
 		if ( $getdata == "backend" ) {
-			$response = wp_remote_get( "https://api.github.com/repos/" . urlencode( $author ) . "/" . urlencode( $project ), [
-				'timeout' => 10,
-				'headers' => [ 'User-Agent' => 'ArgonThemeModern' ],
-			] );
+			$cache_key   = 'argon_github_' . md5( $author . '/' . $project );
+			$cached_body = get_transient( $cache_key );
 
-			if ( ! is_wp_error( $response ) && wp_remote_retrieve_response_code( $response ) === 200 ) {
-				$json = json_decode( wp_remote_retrieve_body( $response ) );
-				if ( ! empty( $json ) ) {
-					$description = esc_html( $json->description );
-					if ( ! empty( $json->homepage ) ) {
-						$description .= esc_html( " <a href='" . $json->homepage . "' target='_blank' no-pjax>" . $json->homepage . "</a>" );
-					}
-					$stars = $json->stargazers_count;
-					$forks = $json->forks_count;
+			if ( $cached_body !== false ) {
+				$json = json_decode( $cached_body );
+			} else {
+				$response = wp_remote_get( "https://api.github.com/repos/" . urlencode( $author ) . "/" . urlencode( $project ), [
+					'timeout' => 10,
+					'headers' => [ 'User-Agent' => 'ArgonThemeModern' ],
+				] );
+
+				if ( ! is_wp_error( $response ) && wp_remote_retrieve_response_code( $response ) === 200 ) {
+					$cached_body = wp_remote_retrieve_body( $response );
+					set_transient( $cache_key, $cached_body, HOUR_IN_SECONDS );
+					$json = json_decode( $cached_body );
 				} else {
-					$getdata = "frontend";
+					$json = null;
 				}
+			}
+
+			if ( ! empty( $json ) ) {
+				$description = esc_html( $json->description );
+				if ( ! empty( $json->homepage ) ) {
+					$description .= esc_html( " <a href='" . $json->homepage . "' target='_blank' no-pjax>" . $json->homepage . "</a>" );
+				}
+				$stars = $json->stargazers_count;
+				$forks = $json->forks_count;
 			} else {
 				$getdata = "frontend";
 			}

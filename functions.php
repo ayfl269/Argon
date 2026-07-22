@@ -280,6 +280,31 @@ require_once( ARGON_MODERN_PATH . '/emotions.php' );
 		return \ArgonModern\Assets::get_asset_uri($path);
 	}
 
+	// 用户 Token 生成与 Cookie 设置（评论编辑、悄悄话模式依赖）
+	if ( ! function_exists( 'set_user_token_cookie' ) ) {
+		function set_user_token_cookie() {
+			if ( isset( $_COOKIE['argon_user_token'] ) && strlen( $_COOKIE['argon_user_token'] ) === 32 && ctype_xdigit( $_COOKIE['argon_user_token'] ) ) {
+				return;
+			}
+			$token = bin2hex( random_bytes( 16 ) );
+			setcookie( 'argon_user_token', $token, [
+				'expires'  => time() + 365 * 86400,
+				'path'     => '/',
+				'domain'   => '',
+				'secure'   => is_ssl(),
+				'httponly' => true,
+				'samesite' => 'Strict',
+			] );
+			$_COOKIE['argon_user_token'] = $token;
+		}
+	}
+
+	if ( ! function_exists( 'get_random_token' ) ) {
+		function get_random_token() {
+			return bin2hex( random_bytes( 16 ) );
+		}
+	}
+
 	function have_catalog(){
 		return \ArgonModern\Template::have_catalog();
 	}

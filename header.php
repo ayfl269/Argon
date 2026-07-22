@@ -94,21 +94,21 @@
 	<?php
 		$seo_description = \ArgonModern\Template::get_seo_description();
 		if ($seo_description != ''){ ?>
-			<meta name="description" content="<?php echo $seo_description?>">
-			<meta property="og:description" content="<?php echo $seo_description?>">
+			<meta name="description" content="<?php echo esc_attr($seo_description); ?>">
+			<meta property="og:description" content="<?php echo esc_attr($seo_description); ?>">
 	<?php } ?>
 
 	<?php
 		$seo_keywords = \ArgonModern\Template::get_seo_keywords();
 		if ($seo_keywords != ''){ ?>
-			<meta name="keywords" content="<?php echo $seo_keywords;?>">
+			<meta name="keywords" content="<?php echo esc_attr($seo_keywords); ?>">
 	<?php } ?>
 
 	<?php
 		if (is_single() || is_page()){
 			$og_image = \ArgonModern\Template::get_og_image();
 			if ($og_image != ''){ ?>
-				<meta property="og:image" content="<?php echo $og_image?>" />
+				<meta property="og:image" content="<?php echo esc_url($og_image); ?>" />
 	<?php 	}
 		} ?>
 
@@ -252,42 +252,42 @@
 	<script>
 		document.documentElement.classList.remove("no-js");
 		var argonConfig = {
-			wp_path: "<?php echo $options->get('wp_path') == '' ? '/' : $options->get('wp_path'); ?>",
-			language: "<?php echo \ArgonModern\Template::get_locate(); ?>",
-			nonce: "<?php echo wp_create_nonce( 'argon_nonce' ); ?>",
-			dateFormat: "<?php echo $options->get('dateformat', 'YMD'); ?>",
+			wp_path: "<?php echo esc_js($options->get('wp_path') == '' ? '/' : $options->get('wp_path')); ?>",
+			language: "<?php echo esc_js(\ArgonModern\Template::get_locate()); ?>",
+			nonce: "<?php echo esc_js(wp_create_nonce( 'argon_nonce' )); ?>",
+			dateFormat: "<?php echo esc_js($options->get('dateformat', 'YMD')); ?>",
 			<?php if ($options->get('enable_zoomify') == 'true'){ ?>
 				zoomify: {
-					duration: <?php echo $options->get('zoomify_duration', 200); ?>,
-					easing: "<?php echo $options->get('zoomify_easing', 'cubic-bezier(0.4,0,0,1)'); ?>",
-					scale: <?php echo $options->get('zoomify_scale', 0.9); ?>
+					duration: <?php echo intval($options->get('zoomify_duration', 200)); ?>,
+					easing: "<?php echo esc_js($options->get('zoomify_easing', 'cubic-bezier(0.4,0,0,1)')); ?>",
+					scale: <?php echo floatval($options->get('zoomify_scale', 0.9)); ?>
 				},
 			<?php } else { ?>
 				zoomify: false,
 			<?php } ?>
-			pangu: "<?php echo $options->get('enable_pangu', 'false'); ?>",
+			pangu: "<?php echo esc_js($options->get('enable_pangu', 'false')); ?>",
 			<?php if ($options->get('enable_lazyload') != 'false'){ ?>
 				lazyload: {
-					threshold: <?php echo $options->get('lazyload_threshold', 800); ?>,
-					effect: "<?php echo $options->get('lazyload_effect', 'fadeIn'); ?>"
+					threshold: <?php echo intval($options->get('lazyload_threshold', 800)); ?>,
+					effect: "<?php echo esc_js($options->get('lazyload_effect', 'fadeIn')); ?>"
 				},
 			<?php } else { ?>
 				lazyload: false,
 			<?php } ?>
-			fold_long_comments: <?php echo $options->get('fold_long_comments', 'false'); ?>,
-			fold_long_shuoshuo: <?php echo $options->get('fold_long_shuoshuo', 'false'); ?>,
-			disable_pjax: <?php echo $options->get('pjax_disabled', 'false'); ?>,
+			fold_long_comments: <?php echo $options->get('fold_long_comments', 'false') === 'true' ? 'true' : 'false'; ?>,
+			fold_long_shuoshuo: <?php echo $options->get('fold_long_shuoshuo', 'false') === 'true' ? 'true' : 'false'; ?>,
+			disable_pjax: <?php echo $options->get('pjax_disabled', 'false') === 'true' ? 'true' : 'false'; ?>,
 			pjax_animation_durtion: <?php echo ($options->get("disable_pjax_animation") == 'true' ? '0' : '600'); ?>,
-			headroom: "<?php echo $options->get('enable_headroom', 'false'); ?>",
+			headroom: "<?php echo esc_js($options->get('enable_headroom', 'false')); ?>",
 			no_banner_by_default: <?php echo ($banner_size == 'hide' ? 'true' : 'false'); ?>,
-			card_shadow: "<?php echo (get_option('argon_card_shadow') == 'big' || $options->get('card_shadow') == 'big' ? 'big' : 'default'); ?>",
-			font: "<?php echo (get_option('argon_font') == 'serif' || $options->get('font') == 'serif' ? 'serif' : 'sans-serif'); ?>",
-			waterflow_columns: "<?php echo $options->get('article_list_waterflow', '1'); ?>",
+			card_shadow: "<?php echo esc_js((get_option('argon_card_shadow') == 'big' || $options->get('card_shadow') == 'big' ? 'big' : 'default')); ?>",
+			font: "<?php echo esc_js((get_option('argon_font') == 'serif' || $options->get('font') == 'serif' ? 'serif' : 'sans-serif')); ?>",
+			waterflow_columns: "<?php echo esc_js($options->get('article_list_waterflow', '1')); ?>",
 			code_highlight: {
-				enable: <?php echo $options->get('argon_enable_code_highlight', 'false'); ?>,
-				hide_linenumber: <?php echo $options->get('argon_code_highlight_hide_linenumber', 'false'); ?>,
-				transparent_linenumber: <?php echo $options->get('argon_code_highlight_transparent_linenumber', 'false'); ?>,
-				break_line: <?php echo $options->get('argon_code_highlight_break_line', 'false'); ?>
+				enable: <?php echo $options->get('argon_enable_code_highlight', 'false') === 'true' ? 'true' : 'false'; ?>,
+				hide_linenumber: <?php echo $options->get('argon_code_highlight_hide_linenumber', 'false') === 'true' ? 'true' : 'false'; ?>,
+				transparent_linenumber: <?php echo $options->get('argon_code_highlight_transparent_linenumber', 'false') === 'true' ? 'true' : 'false'; ?>,
+				break_line: <?php echo $options->get('argon_code_highlight_break_line', 'false') === 'true' ? 'true' : 'false'; ?>
 			}
 		}
 	</script>
