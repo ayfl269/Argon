@@ -2014,9 +2014,6 @@ if (typeof $.pjax !== "undefined") {
 			$card.css("left", "10px");
 			$card.css("width", "calc(100% - 20px)");
 		}
-		$("body,html").animate({
-			scrollTop: 0
-		}, 450);
 	}
 	window.pjaxScrollTop = 0;
 	if ($("html").hasClass("banner-as-cover")){

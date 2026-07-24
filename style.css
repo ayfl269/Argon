@@ -13,10 +13,6 @@ Text Domain: argon-modern
 
 @charset "utf-8";
 
-html {
-	scroll-behavior: smooth;
-}
-
 :root {
 	--themecolor: #5e72e4;
 	--themecolor-R: 94;
@@ -910,7 +906,7 @@ html.triple-column #content {
 }
 
 #primary {
-	transition: all 0.3s ease;
+	transition: opacity 0.3s ease;
 }
 
 .card {

@@ -373,7 +373,7 @@ function pjax(options, $tar) {
 
     var scrollTo = options.scrollTo
 
-    if (pjaxScrollTop){
+    if (pjaxScrollTop !== undefined && pjaxScrollTop !== null){
       scrollTo = pjaxScrollTop
       pjaxScrollTop = 0
     }
