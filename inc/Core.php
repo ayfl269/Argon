@@ -45,7 +45,7 @@ class Core {
 		// Login page style
 		if ( $options->get( 'enable_login_css' ) == 'true' ) {
 			add_action( 'login_head', [ $this, 'login_page_style' ] );
-					}
+		}
 
 		// Performance: Cache headers
 		add_action( 'send_headers', [ $this, 'add_cache_control_headers' ] );
@@ -494,21 +494,21 @@ class Core {
 			case "stop":
 				break;
 			case "fastgit":
-				\Puc_v4_Factory::buildUpdateChecker(
+				\YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(
 					'https://api.solstice23.top/argon/info.json?source=fastgit',
 					ARGON_MODERN_PATH . '/functions.php',
 					'argon'
 				);
 				break;
 			case "cfworker":
-				\Puc_v4_Factory::buildUpdateChecker(
+				\YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(
 					'https://api.solstice23.top/argon/info.json?source=cfworker',
 					ARGON_MODERN_PATH . '/functions.php',
 					'argon'
 				);
 				break;
 			case "solstice23top":
-				\Puc_v4_Factory::buildUpdateChecker(
+				\YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(
 					'https://api.solstice23.top/argon/info.json?source=0',
 					ARGON_MODERN_PATH . '/functions.php',
 					'argon'
@@ -516,7 +516,7 @@ class Core {
 				break;
 			case "github":
 			default:
-				\Puc_v4_Factory::buildUpdateChecker(
+				\YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(
 					'https://raw.githubusercontent.com/solstice23/argon-theme/master/info.json',
 					ARGON_MODERN_PATH . '/functions.php',
 					'argon'
