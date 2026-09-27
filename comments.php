@@ -155,21 +155,13 @@ if ($enable_qq_avatar) {
 				<div class="row hide-on-comment-editing" style="margin-bottom: -10px;">
 					<div class="<?php echo $col1_class;?>">
 						<div class="form-group">
-							<div class="input-group input-group-alternative mb-4">
-								<div class="input-group-prepend">
-									<span class="input-group-text"><i class="fa fa-user-circle"></i></span>
-								</div>
-								<input id="post_comment_name" class="form-control" placeholder="<?php _e('昵称', 'argon');?>" type="text" name="author" value="<?php if (is_user_logged_in()) {echo esc_attr( wp_get_current_user()->display_name );} else {echo esc_attr( $current_commenter['comment_author'] );} ?>">
+							<div class="input-group input-group-alternative mb-4"><div class="input-group-prepend"><span class="input-group-text"><i class="fa fa-user-circle"></i></span></div><input id="post_comment_name" class="form-control" placeholder="<?php _e('昵称', 'argon');?>" type="text" name="author" value="<?php if (is_user_logged_in()) {echo esc_attr( wp_get_current_user()->display_name );} else {echo esc_attr( $current_commenter['comment_author'] );} ?>">
 							</div>
 						</div>
 					</div>
 					<div class="<?php echo $col2_class;?>">
 						<div class="form-group">
-							<div class="input-group input-group-alternative mb-4">
-								<div class="input-group-prepend">
-									<span class="input-group-text"><i class="fa fa-envelope"></i></span>
-								</div>
-								<input id="post_comment_email" class="form-control" placeholder="<?php _e('邮箱', 'argon');?><?php if ($enable_qq_avatar){echo __(' / QQ 号', 'argon');} ?>" type="<?php echo $enable_qq_avatar ? 'text' : 'email'; ?>" name="email" value="<?php if (is_user_logged_in()) {echo esc_attr( wp_get_current_user()->user_email );} else {echo esc_attr( $current_commenter['comment_author_email'] );} ?>" inputmode="<?php echo $enable_qq_avatar ? 'text' : 'email'; ?>" autocapitalize="off" autocomplete="email">
+							<div class="input-group input-group-alternative mb-4"><div class="input-group-prepend"><span class="input-group-text"><i class="fa fa-envelope"></i></span></div><input id="post_comment_email" class="form-control" placeholder="<?php _e('邮箱', 'argon');?><?php if ($enable_qq_avatar){echo __(' / QQ 号', 'argon');} ?>" type="<?php echo $enable_qq_avatar ? 'text' : 'email'; ?>" name="email" value="<?php if (is_user_logged_in()) {echo esc_attr( wp_get_current_user()->user_email );} else {echo esc_attr( $current_commenter['comment_author_email'] );} ?>" inputmode="<?php echo $enable_qq_avatar ? 'text' : 'email'; ?>" autocapitalize="off" autocomplete="email">
 							</div>
 						</div>
 					</div>
@@ -193,11 +185,7 @@ if ($enable_qq_avatar) {
 				<div class="row hide-on-comment-editing" id="post_comment_extra_input" style="display: none; margin-bottom: -10px;">
 					<div class="col-md-12">
 						<div class="form-group">
-							<div class="input-group input-group-alternative mb-4 post-comment-link-container">
-								<div class="input-group-prepend">
-									<span class="input-group-text"><i class="fa fa-link"></i></span>
-								</div>
-								<input id="post_comment_link" class="form-control" placeholder="<?php _e('网站', 'argon'); ?>" type="text" name="url" value="<?php echo esc_attr($current_commenter['comment_author_url']); ?>">
+							<div class="input-group input-group-alternative mb-4 post-comment-link-container"><div class="input-group-prepend"><span class="input-group-text"><i class="fa fa-link"></i></span></div><input id="post_comment_link" class="form-control" placeholder="<?php _e('网站', 'argon'); ?>" type="text" name="url" value="<?php echo esc_attr($current_commenter['comment_author_url']); ?>">
 							</div>
 						</div>
 					</div>
@@ -230,18 +218,18 @@ if ($enable_qq_avatar) {
 							<label class="custom-control-label" for="comment_post_mailnotice"><?php _e('邮件提醒', 'argon');?></label>
 						</div>
 					<?php endif; ?>
-					<button id="post_comment_send" class="btn btn-icon btn-primary comment-btn pull-right mr-0" type="button">
+					<button id="post_comment_send" class="btn btn-icon btn-primary comment-btn float-right mr-0" type="button">
 						<span class="btn-inner--icon hide-on-comment-editing"><i class="fa fa-send"></i></span>
 						<span class="btn-inner--icon hide-on-comment-not-editing"><i class="fa fa-pencil"></i></span>
 						<span class="btn-inner--text hide-on-comment-editing" style="margin-right: 0;"><?php _e('发送', 'argon');?></span>
 						<span class="btn-inner--text hide-on-comment-not-editing" style="margin-right: 0;"><?php _e('编辑', 'argon');?></span>
 					</button>
-					<button id="post_comment_edit_cancel" class="btn btn-icon btn-danger comment-btn pull-right hide-on-comment-not-editing" type="button" style="margin-right: 8px;">
+					<button id="post_comment_edit_cancel" class="btn btn-icon btn-danger comment-btn float-right hide-on-comment-not-editing" type="button" style="margin-right: 8px;">
 						<span class="btn-inner--icon"><i class="fa fa-close"></i></span>
 						<span class="btn-inner--text"><?php _e('取消', 'argon');?></span>
 					</button>
 					<?php if ($options->get("comment_emotion_keyboard", "true") != "false") : ?>
-						<button id="comment_emotion_btn" class="btn btn-icon btn-primary pull-right" type="button" title="<?php _e('表情', 'argon');?>">
+						<button id="comment_emotion_btn" class="btn btn-icon btn-primary float-right" type="button" title="<?php _e('表情', 'argon');?>">
 							<i class="fa fa-smile-o" aria-hidden="true"></i>
 						</button>
 						<?php get_template_part( 'template-parts/emotion-keyboard' ); ?>
@@ -259,9 +247,7 @@ if ($enable_qq_avatar) {
 			<div class="modal-content">
 				<div class="modal-header">
 					<h4 class="modal-title h5"></h4>
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true">×</span>
-					</button>
+					<button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 				</div>
 				<div class="modal-body"></div>
 			</div>
@@ -273,13 +259,11 @@ if ($enable_qq_avatar) {
 			<div class="modal-content">
 				<div class="modal-header">
 					<h4 class="modal-title h5"></h4>
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true">×</span>
-					</button>
+					<button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 				</div>
 				<div class="modal-body"></div>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-secondary btn-sm btn-dismiss" data-dismiss="modal"></button>
+					<button type="button" class="btn btn-secondary btn-sm btn-dismiss" data-bs-dismiss="modal"></button>
 					<button type="button" class="btn btn-primary btn-sm btn-comfirm"></button>
 				</div>
 			</div>

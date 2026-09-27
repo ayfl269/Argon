@@ -21,7 +21,7 @@ class Assets {
 		// Vendor Styles Registration
 		wp_register_style( 'font-awesome', self::get_asset_uri( '/assets/vendor/font-awesome/css/font-awesome.min.css' ), [], '4.7.0' );
 		wp_register_style( 'izitoast', self::get_asset_uri( '/assets/vendor/izitoast/css/iziToast.css' ), [], $version );
-		wp_register_style( 'fancybox', self::get_asset_uri( '/assets/vendor/fancybox/jquery.fancybox.min.css' ), [], $version );
+		wp_register_style( 'glightbox', self::get_asset_uri( '/assets/vendor/glightbox/glightbox.min.css' ), [], $version );
 		wp_register_style( 'nprogress', self::get_asset_uri( '/assets/vendor/nprogress/nprogress.css' ), [], $version );
 		wp_register_style( 'headindex', self::get_asset_uri( '/assets/vendor/headindex/headindex.css' ), [], $version );
 		wp_register_style( 'argon-nouislider', self::get_asset_uri( '/assets/vendor/nouislider/css/nouislider.min.css' ), [], $version );
@@ -40,7 +40,7 @@ class Assets {
 		wp_enqueue_style( 'headindex' );
 
 		if ( $options->get( 'enable_fancybox' ) != 'false' ) {
-			wp_enqueue_style( 'fancybox' );
+			wp_enqueue_style( 'glightbox' );
 		}
 
 		// Pickr and NoUiSlider are used in FAB settings popup
@@ -56,15 +56,14 @@ class Assets {
 		}
 
 		// JS Vendor Registration
-		wp_register_script( 'popper', self::get_asset_uri( '/assets/vendor/popper/popper.min.js' ), [], $version, true );
-		wp_register_script( 'bootstrap', self::get_asset_uri( '/assets/vendor/bootstrap/bootstrap.min.js' ), [ 'jquery', 'popper' ], $version, true );
+		wp_register_script( 'bootstrap', self::get_asset_uri( '/assets/vendor/bootstrap/js/bootstrap.bundle.min.js' ), [ 'jquery' ], $version, true );
 		wp_register_script( 'headroom', self::get_asset_uri( '/assets/vendor/headroom/headroom.min.js' ), [], $version, true );
 		wp_register_script( 'nprogress', self::get_asset_uri( '/assets/vendor/nprogress/nprogress.js' ), [], $version, true );
 		wp_register_script( 'clipboard', self::get_asset_uri( '/assets/vendor/clipboard/clipboard.min.js' ), [], $version, true );
 		wp_register_script( 'izitoast', self::get_asset_uri( '/assets/vendor/izitoast/js/iziToast.min.js' ), [], $version, true );
 		wp_register_script( 'pangu', self::get_asset_uri( '/assets/vendor/pangu/pangu.min.js' ), [], $version, true );
 		wp_register_script( 'clamp', self::get_asset_uri( '/assets/vendor/clamp/clamp.min.js' ), [], $version, true );
-		wp_register_script( 'tippy', self::get_asset_uri( '/assets/vendor/tippy.js/dist/tippy.umd.min.js' ), [ 'popper' ], $version, true );
+		wp_register_script( 'tippy', self::get_asset_uri( '/assets/vendor/tippy.js/dist/tippy-bundle.umd.min.js' ), [], $version, true );
 
 		// Conditional Vendors
 		if ( $options->get( 'enable_pjax' ) != 'false' ) {
@@ -76,11 +75,11 @@ class Assets {
 		wp_enqueue_script( 'headindex' );
 
 		if ( $options->get( 'enable_fancybox' ) != 'false' ) {
-			wp_register_script( 'fancybox', self::get_asset_uri( '/assets/vendor/fancybox/jquery.fancybox.min.js' ), [ 'jquery' ], $version, true );
-			wp_enqueue_script( 'fancybox' );
+			wp_register_script( 'glightbox', self::get_asset_uri( '/assets/vendor/glightbox/js/glightbox.min.js' ), [], $version, true );
+			wp_enqueue_script( 'glightbox' );
 		}
 
-		if ( $options->get( 'enable_zoomify' ) != 'false' ) {
+		if ( $options->get( 'enable_zoomify' ) == 'true' ) {
 			wp_register_script( 'zoomify', self::get_asset_uri( '/assets/vendor/zoomify/zoomify.js' ), [ 'jquery' ], $version, true );
 			wp_enqueue_script( 'zoomify' );
 		}
@@ -94,7 +93,6 @@ class Assets {
 		// Enqueue Core Vendors
 		wp_enqueue_script( 'jquery' );
 		wp_add_inline_script( 'jquery', 'window.$ = jQuery;', 'after' );
-		wp_enqueue_script( 'popper' );
 		wp_enqueue_script( 'bootstrap' );
 		wp_enqueue_script( 'headroom' );
 		wp_enqueue_script( 'nprogress' );
@@ -120,9 +118,12 @@ class Assets {
 
 		// Main Theme Scripts
 		wp_enqueue_script( 'argon-original-js', self::get_asset_uri( '/assets/js/argon.min.js' ), [ 'jquery', 'bootstrap' ], $version, true );
-		wp_add_inline_script( 'argon-original-js', 'window.$ = jQuery;', 'before' );
+		wp_add_inline_script( 'argon-original-js', 'window.$ = jQuery; if (window.bootstrap) { if (!$.fn.tooltip) { $.fn.tooltip = function(options) { return this.each(function() { if (typeof options === "string") { var i = bootstrap.Tooltip.getInstance(this); if (i && typeof i[options] === "function") { i[options](); } } else if (typeof options === "object" && options !== null) { bootstrap.Tooltip.getOrCreateInstance(this, options); } }); }; } if (!$.fn.popover) { $.fn.popover = function(options) { return this.each(function() { if (typeof options === "string") { var i = bootstrap.Popover.getInstance(this); if (i && typeof i[options] === "function") { i[options](); } } else if (typeof options === "object" && options !== null) { bootstrap.Popover.getOrCreateInstance(this, options); } }); }; } }', 'before' );
 		
 		$theme_deps = [ 'argon-original-js', 'izitoast', 'clipboard' ];
+		if ( $options->get( 'enable_fancybox' ) != 'false' ) {
+			$theme_deps[] = 'glightbox';
+		}
 		if ( $options->get( 'enable_pjax' ) != 'false' ) {
 			$theme_deps[] = 'pjax';
 		}
@@ -191,18 +192,28 @@ add_filter('script_loader_tag', function($tag, $handle) {
 
 	// 2. Explicit skip list for critical theme and common libraries
 	$skip_defer = [
-		'jquery', 
-		'jquery-core', 
-		'jquery-migrate', 
-		'popper', 
-		'bootstrap', 
+		'jquery',
+		'jquery-core',
+		'jquery-migrate',
+		'bootstrap',
 		'tippy',
 		'izitoast',
 		'nprogress',
 		'pjax',
-		'argon-original-js', 
+		'argon-original-js',
 		'argon-theme-js',
 		'moment',
+		// Libraries referenced synchronously by argontheme.js while it parses.
+		// deferring them makes them resolve AFTER argontheme.js has already run,
+		// so every `typeof X !== "undefined"` guard silently fails (and Headroom,
+		// Pangu, Clamp throw a ReferenceError, aborting the rest of the script).
+		'glightbox',
+		'headroom',
+		'headindex',
+		'zoomify',
+		'pangu',
+		'clamp',
+		'clipboard',
 		// WordPress core scripts
 		'underscore',
 		'wp-util',

@@ -19,7 +19,7 @@ class ToolbarMenuWalker extends \Walker_Nav_Menu {
 			if ( isset( $args->walker->has_children ) && $args->walker->has_children == 1 ) {
 				$output .= "\n
 				<li class='nav-item dropdown'>
-					<a href='" . $object->url . "' class='nav-link' data-toggle='dropdown' no-pjax onclick='return false;' title='" . $object->description . "'>
+					<a href='" . $object->url . "' class='nav-link' data-bs-toggle='dropdown' no-pjax onclick='return false;' title='" . $object->description . "'>
 						<i class='ni ni-book-bookmark d-lg-none'></i>
 						<span class='nav-link-inner--text'>" . $object->title . "</span>
 				  </a>";

@@ -62,19 +62,19 @@ if ($options->get('page_layout', 'double') == 'single') {
 	                <ul class="nav nav-pills nav-fill" role="tablist">
 						<?php if (have_catalog()) { ?>
 							<li class="nav-item sidebar-tab-switcher" role="presentation">
-								<a class="<?php if ($nowActiveTab == 0) { echo 'active show'; }?>" id="leftbar_tab_catalog_btn" data-toggle="tab" href="#leftbar_tab_catalog" role="tab" aria-controls="leftbar_tab_catalog" aria-selected="<?php echo $nowActiveTab == 0 ? 'true' : 'false'; ?>" no-pjax>
+								<a class="<?php if ($nowActiveTab == 0) { echo 'active show'; }?>" id="leftbar_tab_catalog_btn" data-bs-toggle="tab" href="#leftbar_tab_catalog" role="tab" aria-controls="leftbar_tab_catalog" aria-selected="<?php echo $nowActiveTab == 0 ? 'true' : 'false'; ?>" no-pjax>
 									<?php _e('文章目录', 'argon');?>
 								</a>
 							</li>
 						<?php } ?>
 						<li class="nav-item sidebar-tab-switcher" role="presentation">
-							<a class="<?php if ($nowActiveTab == 1) { echo 'active show'; }?>" id="leftbar_tab_overview_btn" data-toggle="tab" href="#leftbar_tab_overview" role="tab" aria-controls="leftbar_tab_overview" aria-selected="<?php echo $nowActiveTab == 1 ? 'true' : 'false'; ?>" no-pjax>
+							<a class="<?php if ($nowActiveTab == 1) { echo 'active show'; }?>" id="leftbar_tab_overview_btn" data-bs-toggle="tab" href="#leftbar_tab_overview" role="tab" aria-controls="leftbar_tab_overview" aria-selected="<?php echo $nowActiveTab == 1 ? 'true' : 'false'; ?>" no-pjax>
 								<?php _e('站点概览', 'argon');?>
 							</a>
 						</li>
 						<?php if (is_active_sidebar('leftbar-tools')) { ?>
 							<li class="nav-item sidebar-tab-switcher" role="presentation">
-								<a class="<?php if ($nowActiveTab == 2) { echo 'active show'; }?>" id="leftbar_tab_tools_btn" data-toggle="tab" href="#leftbar_tab_tools" role="tab" aria-controls="leftbar_tab_tools" aria-selected="<?php echo $nowActiveTab == 2 ? 'true' : 'false'; ?>" no-pjax>
+								<a class="<?php if ($nowActiveTab == 2) { echo 'active show'; }?>" id="leftbar_tab_tools_btn" data-bs-toggle="tab" href="#leftbar_tab_tools" role="tab" aria-controls="leftbar_tab_tools" aria-selected="<?php echo $nowActiveTab == 2 ? 'true' : 'false'; ?>" no-pjax>
 									<?php _e('功能', 'argon');?>
 								</a>
 							</li>
@@ -111,13 +111,13 @@ if ($options->get('page_layout', 'double') == 'single') {
 									</a>
 								</div>
 								<div class="site-state-item site-state-categories">
-									<button class="btn btn-link" data-toggle="modal" data-target="#blog_categories">
+									<button class="btn btn-link" data-bs-toggle="modal" data-bs-target="#blog_categories">
 										<span class="site-state-item-count"><?php echo wp_count_terms('category'); ?></span>
 										<span class="site-state-item-name"><?php _e('分类', 'argon');?></span>
 									</button>
 								</div>      
 								<div class="site-state-item site-state-tags">
-									<button class="btn btn-link" data-toggle="modal" data-target="#blog_tags">
+									<button class="btn btn-link" data-bs-toggle="modal" data-bs-target="#blog_tags">
 										<span class="site-state-item-count"><?php echo wp_count_terms('post_tag'); ?></span>
 										<span class="site-state-item-name"><?php _e('标签', 'argon');?></span>
 									</button>
@@ -176,9 +176,7 @@ if ($options->get('page_layout', 'double') == 'single') {
 		<div class="modal-content">
 			<div class="modal-header">
 				<h5 class="modal-title" id="blog_categories_title"><?php _e('分类', 'argon');?></h5>
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-					<span>&times;</span>
-				</button>
+				<button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 			</div>
 			<div class="modal-body">
 				<?php
@@ -204,9 +202,7 @@ if ($options->get('page_layout', 'double') == 'single') {
 		<div class="modal-content">
 			<div class="modal-header">
 				<h5 class="modal-title" id="blog_tags_title"><?php _e('标签', 'argon');?></h5>
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-					<span>&times;</span>
-				</button>
+				<button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 			</div>
 			<div class="modal-body">
 				<?php

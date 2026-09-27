@@ -116,13 +116,13 @@ class Shortcodes {
 		$content = $this->shortcode_content_preprocess( $attr, $content );
 		$checked = isset( $attr['checked'] ) ? $attr['checked'] : 'false';
 		$inline  = isset( $attr['inline'] ) ? $attr['inline'] : 'false';
-		$out     = "<div class='shortcode-todo custom-control custom-checkbox";
+		$out     = "<div class='shortcode-todo form-check";
 		if ( $inline == 'true' ) {
 			$out .= " inline";
 		}
 		$out .= "'>
-					<input class='custom-control-input' type='checkbox'" . ( $checked == 'true' ? ' checked' : '' ) . ">
-					<label class='custom-control-label'>
+					<input class='form-check-input' type='checkbox'" . ( $checked == 'true' ? ' checked' : '' ) . ">
+					<label class='form-check-label'>
 						<span>" . $content . "</span>
 					</label>
 				</div>";

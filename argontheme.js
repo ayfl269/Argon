@@ -939,7 +939,7 @@ $(document).on("click" , "#blog_setting_card_radius_to_default" , function(){
 					pinned: pinned ? "false" : "true"
 				},
 				success: function(result){
-					$("#comment_pin_comfirm_dialog").modal('hide');
+					bootstrap.Modal.getOrCreateInstance(document.getElementById('comment_pin_comfirm_dialog')).hide();
 					if (result.status == "success"){
 						if (pinned){
 							$("#comment-" + commentID + " .comment-name .badge-pinned").remove();
@@ -978,7 +978,7 @@ $(document).on("click" , "#blog_setting_card_radius_to_default" , function(){
 					}
 				},
 				error: function(result){
-					$("#comment_pin_comfirm_dialog").modal('hide');
+					bootstrap.Modal.getOrCreateInstance(document.getElementById('comment_pin_comfirm_dialog')).hide();
 					iziToast.show({
 						title: pinned ? __("取消置顶失败") : __("置顶失败"),
 						message: __("未知错误"),
@@ -995,7 +995,7 @@ $(document).on("click" , "#blog_setting_card_radius_to_default" , function(){
 				}
 			});
 		});
-		$("#comment_pin_comfirm_dialog").modal(null);
+		bootstrap.Modal.getOrCreateInstance(document.getElementById('comment_pin_comfirm_dialog')).hide();
 	}
 		
 
@@ -1592,7 +1592,7 @@ function showCommentEditHistory(id){
 	$("#comment_edit_history").data("request-id", requestID);
 	$("#comment_edit_history .modal-title").text(__("评论 #") + id + " " + __("的编辑记录"));
 	$("#comment_edit_history .modal-body").empty().append($('<div>', {class: 'comment-history-loading'}).append($('<span>', {class: 'spinner-border text-primary'})).append($('<span>', {style: 'display: inline-block;transform: translateY(-4px);margin-left: 15px;font-size: 18px;'}).text("加载中")));
-	$("#comment_edit_history").modal(null);
+	bootstrap.Modal.getOrCreateInstance(document.getElementById('comment_edit_history')).show();
 	$.ajax({
 		type: 'POST',
 		url: argonConfig.wp_path + "wp-admin/admin-ajax.php",
@@ -1810,39 +1810,64 @@ function zoomifyInit(){
 }
 zoomifyInit();
 
-/*Fancybox*/
-if (typeof $.fancybox !== "undefined") {
-	$.fancybox.defaults.transitionEffect = "slide";
-	$.fancybox.defaults.buttons = ["zoom", "fullScreen", "thumbs", "close"];
-	$.fancybox.defaults.lang = argonConfig.language;
-	$.fancybox.defaults.i18n = {
+/*GLightbox (replaces Fancybox)*/
+var argonLightbox = null;
+if (typeof GLightbox !== "undefined") {
+	var glightboxLang = {
 		en_US: {
-			CLOSE: "Close",
-			NEXT: "Next",
-			PREV: "Previous",
-			ERROR: "The requested content cannot be loaded. <br/> Please try again later.",
-			PLAY_START: "Start slideshow",
-			PLAY_STOP: "Pause slideshow",
-			FULL_SCREEN: "Full screen",
-			THUMBS: "Thumbnails",
-			DOWNLOAD: "Download",
-			SHARE: "Share",
-			ZOOM: "Zoom"
+			close: "Close",
+			next: "Next",
+			previous: "Previous",
+			nextSlide: "Next slide",
+			prevSlide: "Previous slide",
+			closeLightbox: "Close lightbox",
+			image: "Image",
+			video: "Video",
+			unsupported: "The requested content cannot be loaded. Please try again later."
 		},
 		zh_CN: {
-			CLOSE: "关闭",
-			NEXT: "下一张",
-			PREV: "上一张",
-			ERROR: "图片加载失败",
-			PLAY_START: "开始幻灯片展示",
-			PLAY_STOP: "暂停幻灯片展示",
-			FULL_SCREEN: "全屏",
-			THUMBS: "缩略图",
-			DOWNLOAD: "下载",
-			SHARE: "分享",
-			ZOOM: "缩放"
+			close: "关闭",
+			next: "下一张",
+			previous: "上一张",
+			nextSlide: "下一张",
+			prevSlide: "上一张",
+			closeLightbox: "关闭灯箱",
+			image: "图片",
+			video: "视频",
+			unsupported: "图片加载失败"
 		}
 	};
+	var glightboxConfig = {
+		selector: '.glightbox',
+		opacity: 0.9,
+		cssEffects: true,
+		skin: 'clean',
+		openEffect: 'zoom',
+		closeEffect: 'zoom',
+		slideEffect: 'slide',
+		closable: true,
+		closeButton: true,
+		touchNavigation: true,
+		keyboardNavigation: true,
+		loop: false,
+		zoomable: true,
+		draggable: true,
+		dragToleranceX: 40,
+		dragToleranceY: 65,
+		preventDragOverflow: true,
+		autoplayVideos: true,
+		autoplayVideoStatus: true,
+		cycleVideos: true
+	};
+	var glightboxLangObj = glightboxLang[argonConfig.language] || glightboxLang.en_US;
+	if (glightboxLangObj) {
+		glightboxConfig.labels = glightboxLangObj;
+	}
+	try {
+		argonLightbox = GLightbox(glightboxConfig);
+	} catch (e) {
+		console.warn("GLightbox init failed:", e);
+	}
 }
 
 /*Lazyload*/
@@ -2053,7 +2078,8 @@ if (typeof $.pjax !== "undefined") {
 					{left: "$$", right: "$$", display: true},
 					{left: "$", right: "$", display: false},
 					{left: "\\(", right: "\\)", display: false}
-				]
+				],
+				trust: true
 			});
 		}
 	}catch (err){}
@@ -2074,6 +2100,13 @@ if (typeof $.pjax !== "undefined") {
 	catalogInit();
 	emotionKeyboardInit();
 	cardRadiusSliderInit();
+	if (argonLightbox != null){
+		try{
+			argonLightbox.reload();
+		}catch (err){
+			console.warn("GLightbox reload failed:", err);
+		}
+	}
 	$("html").trigger("resize");
 
 	if (typeof(window.pjaxLoaded) == "function"){
@@ -2118,7 +2151,7 @@ $(document).on("click" , "#blog_categories .tag" , function(){
 /*修复 Modal 关闭按钮的 ARIA 可访问性警告*/
 $(document).on('hide.bs.modal', function (e) {
 	// 在 modal 隐藏前，让关闭按钮失去焦点，避免 aria-hidden 警告
-	$(e.target).find('button.close[data-dismiss="modal"]').blur();
+	$(e.target).find('button.close[data-bs-dismiss="modal"]').blur();
 });
 
 /*侧栏 & 顶栏菜单手机适配*/
@@ -2139,7 +2172,7 @@ $(document).on('hide.bs.modal', function (e) {
 		$("#navbar_global .navbar-toggler").click();
 	});
 	$(document).on("click" , "#navbar_menu_mask" , function(){
-		$("#navbar_global").collapse('hide');
+		bootstrap.Collapse.getOrCreateInstance(document.getElementById('navbar_global')).hide();
 	});
 }();
 
@@ -2641,7 +2674,7 @@ function highlightJsRender(){
 			return;
 		}
 		$(block).parent().attr("id", randomString());
-		hljs.highlightBlock(block);
+		hljs.highlightElement(block);
 		hljs.lineNumbersBlock(block, {singleLine: true});
 		$(block).parent().addClass("hljs-codeblock");
 		if (argonConfig.code_highlight.hide_linenumber){

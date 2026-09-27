@@ -23,9 +23,9 @@
 								if (isset($all_post_types[$filter_type])){
 									$filter_name = $all_post_types[$filter_type] -> labels -> name;
 								?>
-									<div class="custom-control custom-checkbox search-filter-wrapper">
-										<input class="custom-control-input search-filter" name="<?php echo esc_attr( $filter_type ); ?>" id="search_filter_<?php echo esc_attr( $filter_type ); ?>" type="checkbox" <?php echo $checked ? 'checked="checked"' : ''; ?>>
-										<label class="custom-control-label" for="search_filter_<?php echo esc_attr( $filter_type ); ?>"><?php echo esc_html( $filter_name ); ?></label>
+									<div class="form-check search-filter-wrapper">
+										<input class="form-check-input search-filter" name="<?php echo esc_attr( $filter_type ); ?>" id="search_filter_<?php echo esc_attr( $filter_type ); ?>" type="checkbox" <?php echo $checked ? 'checked="checked"' : ''; ?>>
+										<label class="form-check-label" for="search_filter_<?php echo esc_attr( $filter_type ); ?>"><?php echo esc_html( $filter_name ); ?></label>
 									</div>
 								<?php
 								}

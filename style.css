@@ -238,6 +238,22 @@ body {
 	overflow: overlay;
 }
 
+/*
+ * GLightbox 打开/关闭灯箱时会把 html/body 设为 overflow:hidden，滚动条消失使视口变宽，
+ * 于是所有 position:fixed 元素（顶栏、悬浮按钮等）整体横移，产生左右晃动。
+ * 打开期间用 scrollbar-gutter 预留等宽槽位，视口宽度保持不变；
+ * 同时抵消 GLightbox 注入的 .gscrollbar-fixer 外边距（否则正文会被反向推开）。
+ */
+@supports (scrollbar-gutter: stable) {
+	html.glightbox-open {
+		scrollbar-gutter: stable;
+	}
+
+	body.gscrollbar-fixer {
+		margin-right: 0;
+	}
+}
+
 a {
 	transition: color 0.25s ease;
 }
@@ -4642,6 +4658,7 @@ article img.lazyload[src^="data:image/svg+xml;base64,PCEtLUFyZ29uTG9hZGluZy0tPg"
 
 /*Fancybox 样式*/
 .fancybox-wrapper {
+	display: inline-block;
 	width: max-content;
 	max-width: 100%;
 }

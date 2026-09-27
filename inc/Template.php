@@ -232,7 +232,7 @@ class Template {
 		if ( $options->get( 'enable_lazyload' ) != 'false' ) {
 			$content = self::argon_lazyload( $content );
 		}
-		if ( $options->get( 'enable_fancybox' ) != 'false' && $options->get( 'enable_zoomify' ) == 'false' ) {
+		if ( $options->get( 'enable_fancybox' ) != 'false' && $options->get( 'enable_zoomify' ) != 'true' ) {
 			$content = self::argon_fancybox( $content );
 		}
 		global $post;
@@ -318,7 +318,7 @@ class Template {
 	public static function argon_fancybox( $content ) {
 		$options = Options::instance();
 		if ( ! is_feed() && ! is_robots() && ! is_home() ) {
-			$content = preg_replace( '/<img(.*?)src=[\'"](.*?)[\'"](.*?)((\/>)|>|(<\/img>))/i', "<div class='fancybox-wrapper' data-fancybox='post-images' href='$2'>$0</div>", $content );
+			$content = preg_replace( '/<img(.*?)src=[\'"](.*?)[\'"](.*?)((\/>)|>|(<\/img>))/i', "<a class='glightbox fancybox-wrapper' data-gallery='post-images' href='$2'>$0</a>", $content );
 		}
 		return $content;
 	}

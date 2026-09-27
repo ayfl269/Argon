@@ -292,15 +292,17 @@
 		}
 	</script>
 	<?php if ($options->get('argon_math_render') == 'mathjax3') { ?>
-		<script src="<?php echo $options->get('argon_mathjax_cdn_url') == '' ? '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js' : $options->get('argon_mathjax_cdn_url'); ?>" async></script>
+		<script src="<?php echo esc_url($options->get('argon_mathjax_cdn_url') == '' ? '//cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js' : $options->get('argon_mathjax_cdn_url')); ?>" async></script>
 	<?php } ?>
 	<?php if ($options->get('argon_math_render') == 'mathjax2') { ?>
-		<script src="<?php echo $options->get('argon_mathjax_v2_cdn_url') == '' ? '//cdn.jsdelivr.net/npm/mathjax@2.7.5/MathJax.js?config=TeX-AMS_HTML' : $options->get('argon_mathjax_v2_cdn_url'); ?>" async></script>
+		<script src="<?php echo esc_url($options->get('argon_mathjax_v2_cdn_url') == '' ? '//cdn.jsdelivr.net/npm/mathjax@2.7.9/MathJax.js?config=TeX-AMS_HTML' : $options->get('argon_mathjax_v2_cdn_url')); ?>" async></script>
 	<?php } ?>
-	<?php if ($options->get('argon_math_render') == 'katex') { ?>
-		<link rel="stylesheet" href="<?php echo $options->get('argon_katex_cdn_url') == '' ? '//cdn.jsdelivr.net/npm/katex@0.11.1/dist/' : $options->get('argon_katex_cdn_url'); ?>katex.min.css">
-		<script src="<?php echo $options->get('argon_katex_cdn_url') == '' ? '//cdn.jsdelivr.net/npm/katex@0.11.1/dist/' : $options->get('argon_katex_cdn_url'); ?>katex.min.js" defer></script>
-		<script src="<?php echo $options->get('argon_katex_cdn_url') == '' ? '//cdn.jsdelivr.net/npm/katex@0.11.1/dist/' : $options->get('argon_katex_cdn_url'); ?>contrib/auto-render.min.js" defer onload='renderMathInElement(document.body,{delimiters: [{left: "$$", right: "$$", display: true},{left: "$", right: "$", display: false},{left: "\\(", right: "\\)", display: false}]});'></script>
+	<?php if ($options->get('argon_math_render') == 'katex') {
+		$katex_base = $options->get('argon_katex_cdn_url');
+	?>
+		<link rel="stylesheet" href="<?php echo esc_url($katex_base . 'katex.min.css'); ?>">
+		<script src="<?php echo esc_url($katex_base . 'katex.min.js'); ?>" defer></script>
+		<script src="<?php echo esc_url($katex_base . 'contrib/auto-render.min.js'); ?>" defer onload='renderMathInElement(document.body,{delimiters: [{left: "$$", right: "$$", display: true},{left: "$", right: "$", display: false},{left: "\\(", right: "\\)", display: false}],trust: true});'></script>
 	<?php } ?>
 	<script>
 		var darkmodeAutoSwitch = "<?php echo ($options->get("darkmode_autoswitch") == '' ? 'false' : $options->get("darkmode_autoswitch"));?>";
@@ -418,11 +420,7 @@
 				</div>
 				<div class="navbar-collapse collapse" id="navbar_global">
 					<div class="navbar-collapse-header d-lg-none">
-						<div class="input-group input-group-alternative">
-							<div class="input-group-prepend">
-								<span class="input-group-text"><i class="fa fa-search"></i></span>
-							</div>
-							<input id="navbar_search_input_mobile" class="form-control" placeholder="<?php _e('搜索什么...', 'argon-modern');?>" type="text" autocomplete="off">
+						<div class="input-group input-group-alternative"><div class="input-group-prepend"><span class="input-group-text"><i class="fa fa-search"></i></span></div><input id="navbar_search_input_mobile" class="form-control" placeholder="<?php _e('搜索什么...', 'argon-modern');?>" type="text" autocomplete="off">
 						</div>
 					</div>
 					<?php
@@ -439,40 +437,21 @@
 						}
 					?>
 					<ul class="navbar-nav align-items-lg-center ml-lg-auto">
-						<li id="navbar_search_container" class="nav-item d-none d-lg-block" data-toggle="modal">
+						<li id="navbar_search_container" class="nav-item d-none d-lg-block">
 							<div id="navbar_search_input_container">
-								<div class="input-group input-group-alternative">
-									<div class="input-group-prepend">
-										<span class="input-group-text"><i class="fa fa-search"></i></span>
-									</div>
-									<input id="navbar_search_input" class="form-control" placeholder="<?php _e('搜索什么...', 'argon-modern');?>" type="text" autocomplete="off">
+								<div class="input-group input-group-alternative"><div class="input-group-prepend"><span class="input-group-text"><i class="fa fa-search"></i></span></div><input id="navbar_search_input" class="form-control" placeholder="<?php _e('搜索什么...', 'argon-modern');?>" type="text" autocomplete="off">
 								</div>
 							</div>
 						</li>
 					</ul>
 				</div>
-				<div id="navbar_menu_mask" data-toggle="collapse" data-target="#navbar_global"></div>
-				<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar_global" aria-controls="navbar_global" aria-expanded="false" aria-label="Toggle navigation">
+				<div id="navbar_menu_mask" data-bs-toggle="collapse" data-bs-target="#navbar_global"></div>
+				<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar_global" aria-controls="navbar_global" aria-expanded="false" aria-label="Toggle navigation">
 					<span class="navbar-toggler-icon"></span>
 				</button>
 			</div>
 		</nav>
 	</header>
-</div>
-<div class="modal fade" id="argon_search_modal" role="dialog" aria-labelledby="argon_search_modal_title" aria-modal="true">
-	<div class="modal-dialog modal-dialog-centered modal-sm" role="document">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h5 class="modal-title" id="argon_search_modal_title"><?php _e('搜索', 'argon-modern');?></h5>
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-					<span aria-hidden="true">&times;</span>
-				</button>
-			</div>
-			<div class="modal-body">
-				<?php get_search_form(); ?>
-			</div>
-		</div>
-	</div>
 </div>
 
 <section id="banner" class="banner section section-lg section-shaped">

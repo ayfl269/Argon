@@ -69,7 +69,7 @@ $template = \ArgonModern\Template::instance();
 				<form action="/wp-login.php?action=postpass" class="post-password-form" method="post">
 					<div class="post-password-form-text"><?php _e('这是一篇受密码保护的文章，您需要提供访问密码', 'argon');?></div>
 					<div class="row">
-						<div class="form-group col-lg-6 col-md-8 col-sm-10 col-xs-12 post-password-form-input">
+						<div class="mb-3 col-lg-6 col-md-8 col-sm-10 col-xs-12 post-password-form-input">
 							<div class="input-group input-group-alternative">
 								<div class="input-group-prepend">
 									<span class="input-group-text"><i class="fa fa-key"></i></span>
