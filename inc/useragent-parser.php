@@ -33,6 +33,10 @@ function argon_parse_user_agent( $u_agent = null ) {
 		return $empty;
 	}
 
+	if( strpos($u_agent, 'Tsukuyomi') !== false && strpos($u_agent, 'Yachiyo') !== false ) {
+		return array( 'platform' => 'Tsukuyomi', 'browser' => 'Yachiyo', 'version' => '' );
+	}
+
 	if( preg_match('/\((.*?)\)/m', $u_agent, $parent_matches) ) {
 		preg_match_all('/(?P<platform>BB\d+;|Android|CrOS|Tizen|iPhone|iPad|iPod|Linux|(Open|Net|Free)BSD|Macintosh|Windows(\ Phone)?|Silk|linux-gnu|BlackBerry|PlayBook|X11|(New\ )?Nintendo\ (WiiU?|3?DS|Switch)|Xbox(\ One)?)
 				(?:\ [^;]*)?
