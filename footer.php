@@ -26,7 +26,7 @@
 					}
 				};
 			</script>
-			<script src="<?php echo \ArgonModern\Options::instance()->get('mathjax_cdn_url') == '' ? '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js' : \ArgonModern\Options::instance()->get('mathjax_cdn_url'); ?>" id="MathJax-script" async></script>
+			<script src="<?php echo esc_url(\ArgonModern\Options::instance()->get('mathjax_cdn_url') == '' ? '//cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js' : \ArgonModern\Options::instance()->get('mathjax_cdn_url')); ?>" id="MathJax-script" async></script>
 		<?php }?>
 		<?php if (\ArgonModern\Options::instance()->get('math_render') == 'mathjax2') { /*Mathjax V2*/?>
 			<script type="text/x-mathjax-config" id="mathjax_v2_script">
@@ -47,24 +47,27 @@
 					}
 				});
 			</script>
-			<script src="<?php echo \ArgonModern\Options::instance()->get('mathjax_v2_cdn_url') == '' ? '//cdn.jsdelivr.net/npm/mathjax@2.7.5/MathJax.js?config=TeX-AMS_HTML' : \ArgonModern\Options::instance()->get('mathjax_v2_cdn_url'); ?>"></script>
+			<script src="<?php echo esc_url(\ArgonModern\Options::instance()->get('mathjax_v2_cdn_url') == '' ? '//cdn.jsdelivr.net/npm/mathjax@2.7.9/MathJax.js?config=TeX-AMS_HTML' : \ArgonModern\Options::instance()->get('mathjax_v2_cdn_url')); ?>"></script>
 		<?php }?>
-		<?php if (\ArgonModern\Options::instance()->get('math_render') == 'katex') { /*Katex*/?>
-			<link rel="stylesheet" href="<?php echo \ArgonModern\Options::instance()->get('katex_cdn_url') == '' ? '//cdn.jsdelivr.net/npm/katex@0.11.1/dist/' : \ArgonModern\Options::instance()->get('katex_cdn_url'); ?>katex.min.css">
-			<script src="<?php echo \ArgonModern\Options::instance()->get('katex_cdn_url') == '' ? '//cdn.jsdelivr.net/npm/katex@0.11.1/dist/' : \ArgonModern\Options::instance()->get('katex_cdn_url'); ?>katex.min.js"></script>
-			<script src="<?php echo \ArgonModern\Options::instance()->get('katex_cdn_url') == '' ? '//cdn.jsdelivr.net/npm/katex@0.11.1/dist/' : \ArgonModern\Options::instance()->get('katex_cdn_url'); ?>contrib/auto-render.min.js"></script>
-			<script>
-				document.addEventListener("DOMContentLoaded", function() {
-					renderMathInElement(document.body,{
-						delimiters: [
-							{left: "$$", right: "$$", display: true},
-							{left: "$", right: "$", display: false},
-							{left: "\\(", right: "\\)", display: false}
-						]
-					});
+		<?php if (\ArgonModern\Options::instance()->get('math_render') == 'katex') { /*Katex*/
+	$katex_base = \ArgonModern\Options::instance()->get('argon_katex_cdn_url');
+?>
+		<link rel="stylesheet" href="<?php echo esc_url($katex_base . 'katex.min.css'); ?>">
+		<script src="<?php echo esc_url($katex_base . 'katex.min.js'); ?>"></script>
+		<script src="<?php echo esc_url($katex_base . 'contrib/auto-render.min.js'); ?>"></script>
+		<script>
+			document.addEventListener("DOMContentLoaded", function() {
+				renderMathInElement(document.body,{
+					delimiters: [
+						{left: "$$", right: "$$", display: true},
+						{left: "$", right: "$", display: false},
+						{left: "\\(", right: "\\)", display: false}
+					],
+					trust: true
 				});
-			</script>
-		<?php }?>
+			});
+		</script>
+	<?php }?>
 
 		<?php if (\ArgonModern\Options::instance()->get('enable_code_highlight') == 'true') { /*Highlight.js*/?>
 			<link rel="stylesheet" href="<?php echo argon_get_asset_uri('/assets/vendor/highlight/styles/' . (\ArgonModern\Options::instance()->get('code_theme') == '' ? 'vs2015' : \ArgonModern\Options::instance()->get('code_theme')) . '.css'); ?>">
